@@ -7,5 +7,6 @@ namespace InTouchLibrary
         void Connect(string name);
         void Disconnect(string name);
         void SendMessage (Message message);
+        void ReceivingMessages(Message message);
     }
 }
