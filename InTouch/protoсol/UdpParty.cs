@@ -1,14 +1,21 @@
-﻿using Microsoft.Analytics.Interfaces;
-using Microsoft.Analytics.Types.Sql;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace InTouchLibrary.protoсol
 {
-    class UdpParty
+    public static class UdpParty
     {
+        public static async Task SendBinaryAsync(byte[] message, string ip, int port)
+        {
+            using var sender = new UdpClient();
+            await sender.SendAsync(message, message.Length, ip, port);
+        }
+
+        public static async Task<UdpReceiveResult> ReceiveBinaryAsync(int port)
+        {
+            using var receiver = new UdpClient(port);
+            return await receiver.ReceiveAsync();
+        }
     }
 }
