@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace InTouchLibrary.protoсol
+namespace InTouchServer
 {
     public static class UdpParty
     {

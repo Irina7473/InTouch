@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InTouchLibrary.DataModel
+namespace InTouchServer
 {
     class Chat
     {

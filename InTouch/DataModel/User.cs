@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InTouchLibrary
+namespace InTouchServer
 {
     public class ServerUser
     {
