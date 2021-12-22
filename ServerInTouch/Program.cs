@@ -1,20 +1,19 @@
 ﻿using System;
 
 using InTouchServer;
-using Logger;
 
 namespace ServerInTouch
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("Server start");
             Output(MessageType.info, "Server start");
             TcpServer.Notify += Output;
             var log = new LogToFile();
-            //TcpServer.Notify += log.RecordToLog;
+            TcpServer.Notify += log.RecordToLog;
             var server = new TcpServer(8005, 10);
+            server.StartTcpServer();
 
         }
 

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace Logger
+namespace InTouchServer
 {
     public class LogToFile
     {
@@ -22,7 +22,7 @@ namespace Logger
             }
         }
 
-        public void RecordToLog(string typeevent, string message)
+        public void RecordToLog(MessageType typeevent, string message)
         {
             var text = typeevent + " " + DateTime.Now + " " + Environment.UserName + " " + message + " \n";
             File.AppendAllTextAsync(TotalPath, text);

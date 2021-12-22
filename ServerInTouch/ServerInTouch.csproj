@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InTouch\InTouchServer.csproj" />
-    <ProjectReference Include="..\Logger\Logger.csproj" />
   </ItemGroup>
 
 </Project>

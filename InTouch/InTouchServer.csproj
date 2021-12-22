@@ -9,8 +9,4 @@
     <Compile Remove="User.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Logger\Logger.csproj" />
-  </ItemGroup>
-
 </Project>

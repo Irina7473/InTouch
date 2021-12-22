@@ -25,7 +25,7 @@ namespace InTouchServer
         public void StartTcpServer()
         {
             try
-            {
+            {                
                 _listener = new TcpListener(IPAddress.Any, _port);
                 _listener.Start(_amtTouch);
                 Notify?.Invoke(MessageType.info, "Listen");
