@@ -14,10 +14,8 @@ namespace InTouchServer
         private TcpListener _listener;
         private int _amtTouch;
 
-
-
-        public TcpServer(int port, int amt) 
-        { 
+        public TcpServer(int port, int amt)
+        {
             _port = port;
             _amtTouch = amt;
         }
@@ -25,7 +23,7 @@ namespace InTouchServer
         public void StartTcpServer()
         {
             try
-            {                
+            {
                 _listener = new TcpListener(IPAddress.Any, _port);
                 _listener.Start(_amtTouch);
                 Notify?.Invoke(MessageType.info, "Listen");
@@ -33,78 +31,94 @@ namespace InTouchServer
             catch (Exception e)
             {
                 Notify?.Invoke(MessageType.error, e.ToString());
-            }            
+            }
 
             while (true)
             {
                 if (_listener.Pending())
                 {
-                    var tspClient = _listener.AcceptTcpClient();
+                    var client = _listener.AcceptTcpClient();
                     Notify?.Invoke(MessageType.info, "Accept");
 
                     Task task = new(() =>
                     {
-
+                        ConnectToClient(client);
                     });
                     task.Start();
                 }
             }
-
         }
 
-       
+        private void ConnectToClient (TcpClient client)
+        {
+            // Проверка клиента или регистрация нового
+            var netStream = client.GetStream();
+            Task taskSend = new(() => { Send(netStream);});
+            taskSend.Start();
+            Task taskRead = new(() => { Read(netStream); });
+            taskRead.Start();
+        }
+
+        public void Send(NetworkStream netStream)
+        {
+            try
+            {
+                if (netStream.CanWrite)
+                {
+                    // Добавить чтение из базы данных
+                    Byte[] sendBytes = Encoding.Unicode.GetBytes("Получите новые сообщения");
+                    netStream.Write(sendBytes, 0, sendBytes.Length);
+                    Notify?.Invoke(MessageType.text, "Переданы сообщения");
+                }
+                else
+                {
+                    Notify?.Invoke(MessageType.error, "Вы не можете записывать данные в этот поток.");
+                    netStream.Close();
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Notify?.Invoke(MessageType.error, e.ToString());
+            }
+        }
+
+        public void Read(NetworkStream netStream)
+        {
+            try
+            {
+                if (netStream.CanRead)
+                {
+                    var buffer = new byte[1024];
+                    var data = new List<byte>();
+                    do
+                    {
+                        try
+                        {
+                            netStream.Read(buffer, 0, 1024);
+                            data.AddRange(buffer);
+                        }
+                        catch (Exception exc)
+                        {
+                            Notify?.Invoke(MessageType.error, exc.Message);
+                            break;
+                        }
+                    } while (netStream.DataAvailable);
+                    var t = data.ToArray();
+                    var message = Encoding.Unicode.GetString(t, 0, t.Length);
+                    Notify?.Invoke(MessageType.text, "Получено сообщение {message}");
+                    //Добавить запись в базу данных
+                }
+                else
+                {
+                    Notify?.Invoke(MessageType.error, "Вы не можете читать данные из этого потока.");
+                    netStream.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Notify?.Invoke(MessageType.error, e.ToString());
+            }            
+        }
     }
 }
-
-    /*
-     *  public string PartyReceive(Socket connect)
-        {
-            if (connect.Connected)
-            {
-                var buffer = new byte[256];
-                var data = new List<byte>();
-                do
-                {
-                    try
-                    {
-                        connect.Receive(buffer);
-                        data.AddRange(buffer);
-                    }
-                    catch (Exception exc)
-                    {
-                        Notify?.Invoke(exc.Message);
-                        break;
-                    }
-                } while (connect.Available > 0);
-
-                var t = data.ToArray();
-                var message = Encoding.Unicode.GetString(t, 0, t.Length);
-                if (message == "bye" || message == "Bye") PartyClose(connect);
-                //Notify?.Invoke("Received");
-                return message;
-            }
-            else
-            {
-                Notify?.Invoke("No connection");
-                return "Отсутствует соединение";
-            }
-        }
-
-        public void PartySend(Socket connect, string message)
-        {
-            if (connect.Connected)
-            {
-                connect.Send(Encoding.Unicode.GetBytes(message));
-                //Notify?.Invoke("Send...");
-                if (message == "bye" || message == "Bye") PartyClose(connect);
-            }
-            else Notify?.Invoke("No connection");
-        }
-
-        public void PartyClose(Socket connect)
-        {
-            Notify?.Invoke("Close");
-            connect.Shutdown(SocketShutdown.Both);
-            connect.Close();
-        }
-    */

@@ -1,0 +1,64 @@
+﻿<Window x:Class="ClientInTouch.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClientInTouch"
+        mc:Ignorable="d"
+        Title="InTouch" Height="600" Width="800" >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <StackPanel Orientation="Horizontal">
+                    <Button Name="Button_Settings" Content="..."
+                            Click="Button_Settings_Click"
+                            Width="40" Margin="5"/>
+                    <TextBox x:Name="TextBox_SearchContact" Width="100" Margin="5"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        
+        <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3" Background="DarkCyan"
+                              HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+        
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <StackPanel Orientation="Horizontal">
+                    
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1">
+                <StackPanel Orientation="Horizontal">
+                    <RichTextBox x:Name="RichTextBox_СhatСontent" 
+                                 Width="500" Height="200" Margin="10" />
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="TextBox_Message" Width="400" Margin="5"
+                             LostFocus="TextBox_Message_LostFocus"/>
+                    <Button Name="Button_Send" Content="->"
+                            Click="Button_Send_Click"
+                            Width="40" Margin="5"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
