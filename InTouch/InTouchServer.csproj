@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="IServiceChat.cs" />
     <Compile Remove="Message.cs" />
     <Compile Remove="User.cs" />
   </ItemGroup>

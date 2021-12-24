@@ -13,11 +13,13 @@ namespace InTouchServer
         private int _port;
         private TcpListener _listener;
         private int _amtTouch;
+        public int numberTouch;
 
         public TcpServer(int port, int amt)
         {
             _port = port;
             _amtTouch = amt;
+            numberTouch = 0;
         }
 
         public void StartTcpServer()
@@ -26,7 +28,7 @@ namespace InTouchServer
             {
                 _listener = new TcpListener(IPAddress.Any, _port);
                 _listener.Start(_amtTouch);
-                Notify?.Invoke(MessageType.info, "Listen");
+                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Listen");
             }
             catch (Exception e)
             {
@@ -37,29 +39,49 @@ namespace InTouchServer
             {
                 if (_listener.Pending())
                 {
-                    var client = _listener.AcceptTcpClient();
-                    Notify?.Invoke(MessageType.info, "Accept");
-
+                    var connection = _listener.AcceptTcpClient();
+                    //var client=new ClientConnection();
+                    numberTouch++;
+                    Notify?.Invoke(MessageType.info, $"{DateTime.Now} Accept {numberTouch}");
                     Task task = new(() =>
                     {
-                        ConnectToClient(client);
+                        ConnectToClient(connection, numberTouch);
+                        //client.ConnectToClient(connection, numberTouch);
                     });
                     task.Start();
+                    
                 }
             }
         }
 
-        private void ConnectToClient (TcpClient client)
+        
+        private void ConnectToClient (TcpClient connection, int numberTouch)
         {
-            // Проверка клиента или регистрация нового
-            var netStream = client.GetStream();
-            Task taskSend = new(() => { Send(netStream);});
-            taskSend.Start();
-            Task taskRead = new(() => { Read(netStream); });
-            taskRead.Start();
+            try
+            {
+                // Проверка клиента или регистрация нового
+                var netStream = connection.GetStream();
+                
+                Task taskRead = new(() =>
+                {
+                    do
+                    {
+                        Read(netStream, numberTouch);
+                        // Если есть сообщения, то передать
+                    }
+                    while (connection.Connected);
+                });
+                taskRead.Start();
+                Task taskSend = new(() => { Send(netStream, numberTouch); });
+                taskSend.Start();                
+            }
+            catch (Exception e)
+            {
+                Notify?.Invoke(MessageType.error, $"Для соединения {numberTouch} {e.ToString()}");
+            }
         }
 
-        public void Send(NetworkStream netStream)
+        public void Send(NetworkStream netStream, int numberTouch)
         {
             try
             {
@@ -68,11 +90,11 @@ namespace InTouchServer
                     // Добавить чтение из базы данных
                     Byte[] sendBytes = Encoding.Unicode.GetBytes("Получите новые сообщения");
                     netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, "Переданы сообщения");
+                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Переданы сообщения для {numberTouch}");
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете записывать данные в этот поток.");
+                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток для {numberTouch}");
                     netStream.Close();
                     return;
                 }
@@ -80,10 +102,10 @@ namespace InTouchServer
             catch (Exception e)
             {
                 Notify?.Invoke(MessageType.error, e.ToString());
-            }
+            }            
         }
 
-        public void Read(NetworkStream netStream)
+        public void Read(NetworkStream netStream, int numberTouch)
         {
             try
             {
@@ -106,12 +128,12 @@ namespace InTouchServer
                     } while (netStream.DataAvailable);
                     var t = data.ToArray();
                     var message = Encoding.Unicode.GetString(t, 0, t.Length);
-                    Notify?.Invoke(MessageType.text, "Получено сообщение {message}");
+                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {message} ");
                     //Добавить запись в базу данных
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете читать данные из этого потока.");
+                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете читать данные из этого потока для {numberTouch}");
                     netStream.Close();
                 }
             }
@@ -120,5 +142,6 @@ namespace InTouchServer
                 Notify?.Invoke(MessageType.error, e.ToString());
             }            
         }
+        
     }
 }

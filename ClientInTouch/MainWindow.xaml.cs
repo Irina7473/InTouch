@@ -45,7 +45,7 @@ namespace ClientInTouch
         {
             ip= IPAddress.Parse("127.0.0.1");
             port = 8005;
-            client.ConnectToServer(ip, port);
+            client.ConnectToServer(ip, port, "login", "password");
             Received();
         }
 

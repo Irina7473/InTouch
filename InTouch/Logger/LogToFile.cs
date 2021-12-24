@@ -22,10 +22,10 @@ namespace InTouchServer
             }
         }
 
-        public void RecordToLog(MessageType typeevent, string message)
-        {
-            var text = typeevent + " " + DateTime.Now + " " + Environment.UserName + " " + message + " \n";
-            File.AppendAllTextAsync(TotalPath, text);
+        public void RecordToLog(MessageType type, string message)
+        {            
+            var text = type + " " + DateTime.Now + " " + Environment.UserName + " " + message + " \n";
+            File.AppendAllTextAsync(TotalPath, text);            
         }
 
         public string ReadTheLog()
