@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInTouch"
         mc:Ignorable="d"
-        Title="InTouch" Height="600" Width="800" >
+        Title="InTouch" Height="600" Width="900" >
+    <Window.Resources>
+        <ResourceDictionary Source="Style.xaml" />
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -14,8 +17,7 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -23,9 +25,30 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Name="Button_Settings" Content="..."
                             Click="Button_Settings_Click"
-                            Width="40" Margin="5"/>
-                    <TextBox x:Name="TextBox_SearchContact" Width="100" Margin="5"/>
+                            Style="{DynamicResource style_Button}" />
+                    <TextBox x:Name="TextBox_SearchContact" Width="110" Margin="5"
+                             GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>
+                    <Button Name="Button_AddChat" Content="+"
+                            Click="Button_AddChat_Click"
+                            Style="{DynamicResource style_Button}" />
                 </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1">
+                <ListView Name="ContactsList">
+                <ListView.View >
+                    <GridView >
+                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="150"></GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
+                    </GridView>
+                </ListView.View>
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
+                        <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                </ListView>
             </Grid>
         </Grid>
         
@@ -34,9 +57,9 @@
         
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -45,18 +68,20 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1">
-                <StackPanel Orientation="Horizontal">
-                    <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                                 Width="500" Height="200" Margin="10" />
-                </StackPanel>
+                <RichTextBox x:Name="RichTextBox_СhatСontent" 
+                                 Margin="10" />                
             </Grid>
             <Grid Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
-                    <TextBox x:Name="TextBox_Message" Width="400" Margin="5"
-                             LostFocus="TextBox_Message_LostFocus"/>
+                    <Button 
+                            Style="{DynamicResource style_Button}" />
+                    <Button 
+                            Style="{DynamicResource style_Button}" />
+                    <TextBox x:Name="TextBox_Message" Width="500" Margin="5"
+                             GotFocus="TextBox_Message_GotFocus" LostFocus="TextBox_Message_LostFocus"/>
                     <Button Name="Button_Send" Content="->"
                             Click="Button_Send_Click"
-                            Width="40" Margin="5"/>
+                            Style="{DynamicResource style_Button}" />
                 </StackPanel>
             </Grid>
         </Grid>

@@ -48,6 +48,10 @@ namespace ClientInTouch
             client.ConnectToServer(ip, port, "login", "password");
             Received();
         }
+        private void Button_AddChat_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
 
         private void Button_Send_Click(object sender, RoutedEventArgs e)
         {
@@ -73,6 +77,33 @@ namespace ClientInTouch
             }
         }
 
+                
+        private void TextBox_SearchContact_GotFocus(object sender, RoutedEventArgs e)
+        {            
+            if (TextBox_SearchContact.Text == "Поиск")
+            {
+                TextBox_SearchContact.Text = "";
+                TextBox_SearchContact.Foreground = Brushes.DarkGreen;
+            }
+        }
+
+        private void TextBox_SearchContact_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (TextBox_SearchContact.Text == "")
+            {
+                TextBox_SearchContact.Text = "Поиск";
+                TextBox_SearchContact.Foreground = Brushes.Gray;
+            }
+        }
+
+        private void TextBox_Message_GotFocus(object sender, RoutedEventArgs e)
+        {            
+            if (TextBox_Message.Text == "Написать сообщение")
+            {
+                TextBox_Message.Text = "";
+                TextBox_Message.Foreground = Brushes.DarkGreen;
+            }
+        }
         private void TextBox_Message_LostFocus(object sender, RoutedEventArgs e)
         {
             if (TextBox_Message.Text == "")
@@ -80,6 +111,16 @@ namespace ClientInTouch
                 TextBox_Message.Text = "Написать сообщение";
                 TextBox_Message.Foreground = Brushes.Gray;
             }
+        }
+
+        private void MenuItem_Click_Look(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void MenuItem_Click_Delete(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void Received()
@@ -104,6 +145,5 @@ namespace ClientInTouch
             }
         }
 
-       
     }
 }
