@@ -11,6 +11,7 @@ namespace InTouchServer
         public int ChatId { get; set; }       
         public string MessageType { get; set; }
         public byte[] Content { get; set; }
+        public string Status { get; set; }
 
     }
 
@@ -19,6 +20,7 @@ namespace InTouchServer
         info,
         warn,
         error,        
-        text
+        text,
+        img
     }
 }

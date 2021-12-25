@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+
 
 namespace InTouchServer
 {
-    class Chat
+    public class Chat
     {
         public int Id { get; set; }
-        public string NameChat { get; set; }
+        public string Name { get; set; }
         public bool Security { get; set; }
+        public List<User> Users { get; set; }
+
     }
 }

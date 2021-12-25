@@ -12,8 +12,8 @@ namespace InTouchServer
         public static event Action<MessageType, string> Notify;
         private int _port;
         private TcpListener _listener;
-        private int _amtTouch;
-        public int numberTouch;
+        private int _amtTouch;  //макс кол-во активных соединений
+        public int numberTouch; //номер соединения
 
         public TcpServer(int port, int amt)
         {
