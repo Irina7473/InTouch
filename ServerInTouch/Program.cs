@@ -9,9 +9,12 @@ namespace ServerInTouch
         static void Main()
         {
             Output(MessageType.info, $"{DateTime.Now} Server start");
+            LogToFile.Notify += Output;
             TcpServer.Notify += Output;
+            ClientConnection.Notify += Output;
             var log = new LogToFile();
             TcpServer.Notify += log.RecordToLog;
+            ClientConnection.Notify += log.RecordToLog;
             var server = new TcpServer(8005, 10);
             server.StartTcpServer();
 

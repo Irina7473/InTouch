@@ -40,21 +40,22 @@ namespace InTouchServer
                 if (_listener.Pending())
                 {
                     var connection = _listener.AcceptTcpClient();
-                    //var client=new ClientConnection();
+                    var client=new ClientConnection();
                     numberTouch++;
                     Notify?.Invoke(MessageType.info, $"{DateTime.Now} Accept {numberTouch}");
                     Task task = new(() =>
                     {
-                        ConnectToClient(connection, numberTouch);
-                        //client.ConnectToClient(connection, numberTouch);
+                        //ConnectToClient(connection, numberTouch);
+                        //Notify?.Invoke(MessageType.info, $"task connect {numberTouch}");
+                        client.ConnectToClient(connection, numberTouch);
                     });
                     task.Start();
-                    
+                    //Notify?.Invoke(MessageType.info, $"task Start {numberTouch}");
                 }
             }
         }
 
-        
+        /*
         private void ConnectToClient (TcpClient connection, int numberTouch)
         {
             try
@@ -142,6 +143,6 @@ namespace InTouchServer
                 Notify?.Invoke(MessageType.error, e.ToString());
             }            
         }
-        
+        */
     }
 }

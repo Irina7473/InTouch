@@ -6,6 +6,7 @@ namespace InTouchServer
 {
     public class LogToFile
     {
+        public static event Action<MessageType, string> Notify;
         private readonly string TotalPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TotalLog.log");
 
         public LogToFile() { }
@@ -24,8 +25,15 @@ namespace InTouchServer
 
         public void RecordToLog(MessageType type, string message)
         {            
-            var text = type + " " + DateTime.Now + " " + Environment.UserName + " " + message + " \n";
-            File.AppendAllTextAsync(TotalPath, text);            
+            var text = type + " " + DateTime.Now + " " + message + " \n";
+            try
+            {
+                File.AppendAllTextAsync(TotalPath, text);
+            }
+            catch (Exception e)
+            {
+                Notify?.Invoke(MessageType.error, e.ToString());
+            }
         }
 
         public string ReadTheLog()
