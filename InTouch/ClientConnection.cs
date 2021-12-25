@@ -15,7 +15,6 @@ namespace InTouchServer
         public int numberTouch;
         public TcpClient client;
         public User user;
-        //private NetworkStream _netStream;
 
         /*
         public ClientConnection(TcpClient client, int numberTouch)
@@ -34,14 +33,9 @@ namespace InTouchServer
                 var ident = Identification(netStream, numberTouch);
                 if (ident)
                 {
-                    // Передать user его чаты
-                    // Если есть сообщения, то передать
-                    // Запуск чтения и передачи
-                    Task taskRead = new(() => { Read(netStream, numberTouch); });
-                    taskRead.Start();
-                    Task taskSend = new(() => { Send(netStream, numberTouch); });
-                    taskSend.Start();
+                    Communication(netStream);
                 }
+                else Close();
             }
             catch (Exception e)
             {
@@ -49,28 +43,55 @@ namespace InTouchServer
             }
         }
 
+        public void Communication(NetworkStream netStream)
+        {
+            // Передать user его чаты
+            // Если есть сообщения, то передать
+            // Запуск чтения и передачи
+            //Task taskSend = new(() => { Send(netStream, "Hello"); });
+            //taskSend.Start();
+            Task taskRead = new(() => {
+                while (client.Connected)
+                {
+                    Read(netStream);
+                    Send(netStream, "Доставлено");
+                } });
+            taskRead.Start();
+            Task taskSend = new(() => { Send(netStream, "Hello"); });
+            taskSend.Start();
+        }
+
         public bool Identification(NetworkStream netStream, int numberTouch)
         {
 
-            var message = Read(netStream, numberTouch);
+            var message = Read(netStream);
             //распарсить 1 сообщение клиента
             // Проверка клиента или регистрация нового, по логину-паролю
-            // user= user из БД
-            user = new();
-            return true;
-            // если нет такого, то return false;    
+            var found = true;
+            if (found) //написать условие
+            {
+                // user= user из БД
+                user = new();
+                Send(netStream, "admit");
+                return true;
+            }
+            else {
+                // если нет такого
+                Send(netStream, "prevent");
+                return false;
+            }
         }
 
-        public void Send(NetworkStream netStream, int numberTouch)
+        public void Send(NetworkStream netStream, string message)
         {
             try
             {
                 if (netStream.CanWrite)
                 {
                     // Добавить чтение из базы данных
-                    Byte[] sendBytes = Encoding.Unicode.GetBytes("Получите новые сообщения");
+                    Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
                     netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Переданы сообщения для {numberTouch}");
+                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} передано {message}");
                 }
                 else
                 {
@@ -86,7 +107,7 @@ namespace InTouchServer
             }
         }
 
-        public string Read(NetworkStream netStream, int numberTouch)
+        public string Read(NetworkStream netStream)
         {
             try
             {
@@ -98,7 +119,7 @@ namespace InTouchServer
                     {
                         try
                         {
-                            netStream.Read(buffer, 0, 1024);
+                            netStream.Read(buffer, 0, buffer.Length);
                             data.AddRange(buffer);
                         }
                         catch (Exception exc)

@@ -22,6 +22,7 @@ namespace ClientInTouch
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
     public partial class MainWindow : Window
     {
         Client client;
@@ -38,9 +39,33 @@ namespace ClientInTouch
             message = string.Empty;
             Notify += log.RecordToLog;
             Client.Notify += log.RecordToLog;
-
+            
         }
 
+        private void Button_Entry_Click(object sender, RoutedEventArgs e)
+        {
+            EntryWindow entry = new EntryWindow();
+            entry.Owner = this;
+            entry.client = this.client;
+            if (entry.ShowDialog() == true)
+            {
+                //сравнение не работает!!
+                if (entry.Message != "admit") MessageBox.Show("Неверный логин или пароль");
+                else
+                {
+                    MessageBox.Show("Авторизация пройдена");
+                    Button_Entry.Content = entry.TextBox_Login.Text;
+                    Button_Entry.IsEnabled = true;
+                    client = entry.client;                    
+                    //client.Communication();
+                }
+                Button_Entry.Content = entry.TextBox_Login.Text;
+                Button_Entry.IsEnabled = true;
+                this.client = entry.client;
+            }
+            else MessageBox.Show("Авторизация не пройдена");
+        }
+                       
         private void Button_Settings_Click(object sender, RoutedEventArgs e)
         {
             ip= IPAddress.Parse("127.0.0.1");

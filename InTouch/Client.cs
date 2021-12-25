@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace InTouchServer
 {
@@ -12,7 +13,7 @@ namespace InTouchServer
         public static event Action<MessageType, string> Notify;
         public TcpClient client;
         private string _macAddress;
-        private NetworkStream _netStream;
+        public NetworkStream _netStream;
 
         public void ConnectToServer(IPAddress ip, int port, string login, string password)
         {
@@ -22,13 +23,28 @@ namespace InTouchServer
                 client.Connect(ip, port);
                 _macAddress = GetMacAddress();
                 _netStream = client.GetStream();
-                Notify?.Invoke(MessageType.info, "Соединение с сервером установлено");
-                Send($"Подключено устройство {_macAddress} {login} {password}");
+                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Соединение с сервером установлено");
+                //Send($"{DateTime.Now} Подключено устройство {_macAddress} {login} {password}");
+                Send($"{login} {password}");
+                Communication();
             }
             catch (Exception e)
             {
                 Notify?.Invoke(MessageType.error, e.ToString());
             }            
+        }
+
+        public void Communication()
+        {
+            
+            Task taskRead = new(() => {
+                while (client.Connected)
+                {
+                    Read();
+                }
+            });
+            taskRead.Start();
+
         }
 
         private string GetMacAddress()
@@ -53,11 +69,11 @@ namespace InTouchServer
                 {
                     Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
                     _netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, $"Передано сообщение {message}");
+                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Передано сообщение {message}");
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете записывать данные в этот поток.");
+                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток.");
                     Close();
                     _netStream.Close();
                     return;
@@ -92,7 +108,7 @@ namespace InTouchServer
                     } while (_netStream.DataAvailable);
                     var t = data.ToArray();
                     var message = Encoding.Unicode.GetString(t, 0, t.Length);                    
-                    Notify?.Invoke(MessageType.text, $"Получено сообщение {message}");
+                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Получено сообщение {message}");
                     return message;
                 }
                 else
@@ -113,7 +129,7 @@ namespace InTouchServer
         private void Close()
         {
             client.Close();
-            Notify?.Invoke(MessageType.warn, "Соединение с сервером закрыто");
+            Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
         }
 
     }

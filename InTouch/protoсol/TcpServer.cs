@@ -45,12 +45,10 @@ namespace InTouchServer
                     Notify?.Invoke(MessageType.info, $"{DateTime.Now} Accept {numberTouch}");
                     Task task = new(() =>
                     {
-                        //ConnectToClient(connection, numberTouch);
-                        //Notify?.Invoke(MessageType.info, $"task connect {numberTouch}");
+                        //ConnectToClient(connection, numberTouch);                        
                         client.ConnectToClient(connection, numberTouch);
                     });
-                    task.Start();
-                    //Notify?.Invoke(MessageType.info, $"task Start {numberTouch}");
+                    task.Start();                    
                 }
             }
         }

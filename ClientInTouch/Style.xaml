@@ -32,7 +32,53 @@
                 <Setter Property="Cursor" Value="Hand"/>
             </Trigger>
         </Style.Triggers>
-    </Style> 
+    </Style>
+
+    <Style x:Key="style_ButtonEntry" TargetType="Button">
+        <Style.Setters>
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Width" Value="200" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="8" BorderThickness="1" Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="LightCyan" Offset="0" />
+                                    <GradientStop Color="DarkCyan" Offset="0.3" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="style_TextBoxEntry" TargetType="TextBox">
+        <Style.Setters>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Width" Value="200" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Margin" Value="10" />
+        </Style.Setters>
+    </Style>
+
+    
+    
+    
 
     <Style x:Key="style_Button_Exit" TargetType="Button">
         <Style.Setters>

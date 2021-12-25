@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInTouch"
         mc:Ignorable="d"
-        Title="InTouch" Height="600" Width="900" >
+        Title="InTouch" Height="600" Width="900" Background="LightSeaGreen">
     <Window.Resources>
         <ResourceDictionary Source="Style.xaml" />
     </Window.Resources>
-    <Grid>
+    <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -27,13 +27,14 @@
                             Click="Button_Settings_Click"
                             Style="{DynamicResource style_Button}" />
                     <TextBox x:Name="TextBox_SearchContact" Width="110" Margin="5"
+                             Background="PaleTurquoise"
                              GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>
                     <Button Name="Button_AddChat" Content="+"
                             Click="Button_AddChat_Click"
                             Style="{DynamicResource style_Button}" />
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" >
                 <ListView Name="ContactsList">
                 <ListView.View >
                     <GridView >
@@ -64,12 +65,14 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    
+                    <Button Name="Button_Entry" Content="ВХОД"
+                            Click="Button_Entry_Click"
+                            Width="100"  Style="{DynamicResource style_Button}" />
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1">
                 <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                                 Margin="10" />                
+                              Background="AliceBlue"   Margin="10" />                
             </Grid>
             <Grid Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
@@ -78,6 +81,7 @@
                     <Button 
                             Style="{DynamicResource style_Button}" />
                     <TextBox x:Name="TextBox_Message" Width="500" Margin="5"
+                             Background="AliceBlue"
                              GotFocus="TextBox_Message_GotFocus" LostFocus="TextBox_Message_LostFocus"/>
                     <Button Name="Button_Send" Content="->"
                             Click="Button_Send_Click"

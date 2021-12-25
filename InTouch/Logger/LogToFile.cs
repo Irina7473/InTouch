@@ -25,7 +25,7 @@ namespace InTouchServer
 
         public void RecordToLog(MessageType type, string message)
         {            
-            var text = type + " " + DateTime.Now + " " + message + " \n";
+            var text = type + " " + message + " \n";
             try
             {
                 File.AppendAllTextAsync(TotalPath, text);
