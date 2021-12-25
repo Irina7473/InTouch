@@ -28,8 +28,23 @@
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="FontWeight" Value="Bold" />
-                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Foreground" Value="DarkCyan" />
                 <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="8" BorderThickness="1" Padding="2">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="LightCyan" Offset="0.3" />
+                                        <GradientStop Color="DarkCyan" Offset="0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -59,10 +74,25 @@
             </Setter>
         </Style.Setters>
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
+            <Trigger Property="IsMouseOver" Value="True">                
                 <Setter Property="FontWeight" Value="Bold" />
-                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Foreground" Value="DarkCyan" />
                 <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="8" BorderThickness="1" Padding="2">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="LightCyan" Offset="0.3" />
+                                        <GradientStop Color="DarkCyan" Offset="0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -70,81 +100,11 @@
     <Style x:Key="style_TextBoxEntry" TargetType="TextBox">
         <Style.Setters>
             <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="Gray" />
             <Setter Property="Width" Value="200" />
             <Setter Property="Height" Value="30" />
             <Setter Property="Margin" Value="10" />
         </Style.Setters>
-    </Style>
-
-    
-    
-    
-
-    <Style x:Key="style_Button_Exit" TargetType="Button">
-        <Style.Setters>
-            <Setter Property="Width" Value="300" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="Margin" Value="10" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="10" BorderThickness="1" Padding="2">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="Silver" Offset="0" />
-                                    <GradientStop Color="Lavender" Offset="0.75" />
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style.Setters>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="FontSize" Value="20" />
-                <Setter Property="Foreground" Value="Crimson" />
-                <Setter Property="Cursor" Value="Hand"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="style_Button_dialog" TargetType="Button">
-        <Setter Property="Width" Value="70" />
-        <Setter Property="Height" Value="20" />
-        <Setter Property="Margin" Value="10" />
-    </Style>
-
-    <Style x:Key="style_CheckBox" TargetType="CheckBox">
-        <Setter Property="Height" Value="30" />
-        <Setter Property="Margin" Value="10" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-    </Style>
-
-    <Style x:Key="style_ComboBox" TargetType="ComboBox">
-        <Setter Property="Height" Value="30" />
-        <Setter Property="Width" Value="200" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-    </Style>
-
-    <Style x:Key="style_TextBlock" TargetType="TextBlock">
-        <Style.Triggers>
-            <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                    <Condition Binding="{Binding ElementName=input_Name, Path=Text}" Value="" />
-                    <Condition Binding="{Binding ElementName=input_Age, Path=Text}" Value="" />
-                </MultiDataTrigger.Conditions>
-                <MultiDataTrigger.Setters>
-                    <Setter Property="IsEnabled" Value="False" />
-                </MultiDataTrigger.Setters>
-            </MultiDataTrigger>
-        </Style.Triggers>
-        <Setter Property="Width" Value="200" />
-        <Setter Property="Height" Value="30" />
-
-
     </Style>
     
 </ResourceDictionary>

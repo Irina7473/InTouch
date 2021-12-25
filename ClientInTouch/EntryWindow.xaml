@@ -12,10 +12,10 @@
     <Grid Margin="10">
         <StackPanel>
             <TextBlock Text="Вход" HorizontalAlignment="Center" FontSize="20" Margin="5" />
-            <TextBox x:Name="TextBox_Login" Text="Логин"
+            <TextBox x:Name="TextBox_Login" Text="Логин" 
                      Style="{DynamicResource style_TextBoxEntry}" 
                      GotFocus="TextBox_Login_GotFocus"  LostFocus="TextBox_Login_LostFocus"/>
-            <TextBox x:Name="TextBox_Password" Text="Пароль" Width="200" Margin="10"
+            <TextBox x:Name="TextBox_Password" Text="Пароль" 
                      Style="{DynamicResource style_TextBoxEntry}" 
                      GotFocus="TextBox_Password_GotFocus"  LostFocus="TextBox_Password_LostFocus"/>
             <Button x:Name="Button_Entry" Content="Войти" 

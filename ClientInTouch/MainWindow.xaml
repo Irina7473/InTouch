@@ -26,8 +26,8 @@
                     <Button Name="Button_Settings" Content="..."
                             Click="Button_Settings_Click"
                             Style="{DynamicResource style_Button}" />
-                    <TextBox x:Name="TextBox_SearchContact" Width="110" Margin="5"
-                             Background="PaleTurquoise"
+                    <TextBox x:Name="TextBox_SearchContact" Text="Поиск"
+                             Width="110" Margin="5" Background="PaleTurquoise" Foreground="Gray"
                              GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>
                     <Button Name="Button_AddChat" Content="+"
                             Click="Button_AddChat_Click"
@@ -80,8 +80,8 @@
                             Style="{DynamicResource style_Button}" />
                     <Button 
                             Style="{DynamicResource style_Button}" />
-                    <TextBox x:Name="TextBox_Message" Width="500" Margin="5"
-                             Background="AliceBlue"
+                    <TextBox x:Name="TextBox_Message" Text="Написать сообщение"
+                             Width="500" Margin="5" Background="AliceBlue" Foreground="Gray"
                              GotFocus="TextBox_Message_GotFocus" LostFocus="TextBox_Message_LostFocus"/>
                     <Button Name="Button_Send" Content="->"
                             Click="Button_Send_Click"
