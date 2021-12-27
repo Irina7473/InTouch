@@ -69,12 +69,14 @@
                             Click="Button_Entry_Click"
                             Width="100"  Style="{DynamicResource style_Button}" />
                 </StackPanel>
-            </Grid>
+            </Grid>            
             <Grid Grid.Row="1">
-                <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                              Background="AliceBlue"   Margin="10" />                
+                <ScrollViewer>
+                    <RichTextBox x:Name="RichTextBox_СhatСontent" 
+                              Background="AliceBlue"   Margin="10" />
+                </ScrollViewer>
             </Grid>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="3">
                 <StackPanel Orientation="Horizontal">
                     <Button 
                             Style="{DynamicResource style_Button}" />

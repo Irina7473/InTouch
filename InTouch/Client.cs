@@ -12,8 +12,18 @@ namespace InTouchServer
     {
         public static event Action<MessageType, string> Notify;
         public TcpClient client;
-        private string _macAddress;
+        //private string _macAddress;
         public NetworkStream _netStream;
+        private User _user;
+
+        public bool Connected { get; set; }
+
+        /*
+public Client ()
+{
+client = new();
+_netStream = client.GetStream();
+}*/
 
         public void ConnectToServer(IPAddress ip, int port, string login, string password)
         {
@@ -21,32 +31,29 @@ namespace InTouchServer
             {
                 client = new();
                 client.Connect(ip, port);
-                _macAddress = GetMacAddress();
                 _netStream = client.GetStream();
-                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Соединение с сервером установлено");
-                //Send($"{DateTime.Now} Подключено устройство {_macAddress} {login} {password}");
+                //_macAddress = GetMacAddress();
+                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Соединение с сервером установлено");                
                 Send($"{login} {password}");
-                Communication();
             }
             catch (Exception e)
             {
                 Notify?.Invoke(MessageType.error, e.ToString());
             }            
         }
-
+        /*
         public void Communication()
-        {
-            
+        {            
             Task taskRead = new(() => {
                 while (client.Connected)
                 {
                     Read();
                 }
             });
-            taskRead.Start();
+            taskRead.Start();            
+        }*/
 
-        }
-
+        /*
         private string GetMacAddress()
         {
             string macAddress = "";
@@ -59,7 +66,7 @@ namespace InTouchServer
                 }
             }
             return macAddress;
-        }
+        }*/
 
         public void Send(string message)
         {

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
-
+using System.Threading;
 
 namespace InTouchServer
 {
@@ -48,16 +48,22 @@ namespace InTouchServer
             // Передать user его чаты
             // Если есть сообщения, то передать
             // Запуск чтения и передачи
-            //Task taskSend = new(() => { Send(netStream, "Hello"); });
+            
+            Task taskSend = new(() => { 
+                Send(netStream, "Hello");
+                for (int i = 0; i < 10; i++) { Send(netStream, "123456789"); Thread.Sleep(1000); }
+                Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
+            });
             //taskSend.Start();
             Task taskRead = new(() => {
                 while (client.Connected)
                 {
                     Read(netStream);
+                    //Добавить запись в базу данных
+                    // Добавить чтение из базы данных
                     Send(netStream, "Доставлено");
                 } });
             taskRead.Start();
-            Task taskSend = new(() => { Send(netStream, "Hello"); });
             taskSend.Start();
         }
 
@@ -87,11 +93,10 @@ namespace InTouchServer
             try
             {
                 if (netStream.CanWrite)
-                {
-                    // Добавить чтение из базы данных
+                {                    
                     Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
                     netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} передано {message}");
+                    //Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} передано {message}");
                 }
                 else
                 {
@@ -131,7 +136,6 @@ namespace InTouchServer
                     var t = data.ToArray();
                     var message = Encoding.Unicode.GetString(t, 0, t.Length);
                     Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {message} ");
-                    //Добавить запись в базу данных
                     return message;
                 }
                 else
