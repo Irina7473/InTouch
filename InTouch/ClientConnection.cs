@@ -16,12 +16,6 @@ namespace InTouchServer
         public TcpClient client;
         public User user;
 
-        /*
-        public ClientConnection(TcpClient client, int numberTouch)
-        {
-            this.client = client;
-            this.numberTouch = numberTouch;
-        }*/
 
         public void ConnectToClient(TcpClient connection, int number)
         {
@@ -40,6 +34,28 @@ namespace InTouchServer
             catch (Exception e)
             {
                 Notify?.Invoke(MessageType.error, $"Для соединения {numberTouch} {e.ToString()}");
+            }
+        }
+
+        public bool Identification(NetworkStream netStream, int numberTouch)
+        {
+
+            var message = Read(netStream);
+            //распарсить 1 сообщение клиента
+            // Проверка клиента или регистрация нового, по логину-паролю
+            var found = true;
+            if (found) //написать условие
+            {
+                // user= user из БД
+                user = new();
+                Send(netStream, "admit");
+                return true;
+            }
+            else
+            {
+                // если нет такого
+                Send(netStream, "prevent");
+                return false;
             }
         }
 
@@ -65,93 +81,88 @@ namespace InTouchServer
                 } });
             taskRead.Start();
             taskSend.Start();
-        }
-
-        public bool Identification(NetworkStream netStream, int numberTouch)
-        {
-
-            var message = Read(netStream);
-            //распарсить 1 сообщение клиента
-            // Проверка клиента или регистрация нового, по логину-паролю
-            var found = true;
-            if (found) //написать условие
-            {
-                // user= user из БД
-                user = new();
-                Send(netStream, "admit");
-                return true;
-            }
-            else {
-                // если нет такого
-                Send(netStream, "prevent");
-                return false;
-            }
-        }
+        }        
 
         public void Send(NetworkStream netStream, string message)
         {
-            try
+            if (client.Connected)
             {
-                if (netStream.CanWrite)
-                {                    
-                    Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
-                    netStream.Write(sendBytes, 0, sendBytes.Length);
-                    //Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} передано {message}");
-                }
-                else
+                try
                 {
-                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток для {numberTouch}");
-                    netStream.Close();
-                    Close();
-                    return;
+                    if (netStream.CanWrite)
+                    {
+                        Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
+                        netStream.Write(sendBytes, 0, sendBytes.Length);
+                        //Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} передано {message}");
+                    }
+                    else
+                    {
+                        Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток для {numberTouch}");
+                        netStream.Close();
+                        Close();
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Notify?.Invoke(MessageType.error, e.ToString());
                 }
             }
-            catch (Exception e)
+            else
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
+                
             }
         }
 
         public string Read(NetworkStream netStream)
         {
-            try
+            if (client.Connected)
             {
-                if (netStream.CanRead)
+                try
                 {
-                    var buffer = new byte[1024];
-                    var data = new List<byte>();
-                    do
+                    if (netStream.CanRead)
                     {
-                        try
+                        var buffer = new byte[1024];
+                        var data = new List<byte>();
+                        do
                         {
-                            netStream.Read(buffer, 0, buffer.Length);
-                            data.AddRange(buffer);
-                        }
-                        catch (Exception exc)
-                        {
-                            Notify?.Invoke(MessageType.error, exc.Message);
-                            break;
-                        }
-                    } while (netStream.DataAvailable);
-                    var t = data.ToArray();
-                    var message = Encoding.Unicode.GetString(t, 0, t.Length);
-                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {message} ");
-                    return message;
+                            try
+                            {
+                                netStream.Read(buffer, 0, buffer.Length);
+                                data.AddRange(buffer);
+                            }
+                            catch (Exception exc)
+                            {
+                                Notify?.Invoke(MessageType.error, exc.Message);
+                                break;
+                            }
+                        } while (netStream.DataAvailable);
+                        var t = data.ToArray();
+                        var message = Encoding.Unicode.GetString(t, 0, t.Length);
+                        Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {message} ");
+                        return message;
+                    }
+                    else
+                    {
+                        Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете читать данные из этого потока для {numberTouch}");
+                        netStream.Close();
+                        Close();
+                        return string.Empty;
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете читать данные из этого потока для {numberTouch}");
-                    netStream.Close();
-                    Close();
+                    Notify?.Invoke(MessageType.error, e.ToString());
                     return string.Empty;
                 }
             }
-            catch (Exception e)
+            else
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
                 return string.Empty;
             }
-        }
+            }
 
         private void Close ()
         {

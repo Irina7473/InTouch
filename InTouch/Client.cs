@@ -133,7 +133,7 @@ _netStream = client.GetStream();
             }            
         }
 
-        private void Close()
+        public void Close()
         {
             client.Close();
             Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение с сервером закрыто");

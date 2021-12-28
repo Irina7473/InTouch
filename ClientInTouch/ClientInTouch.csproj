@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\settings.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Remove="Style.xaml" />
   </ItemGroup>
 
@@ -15,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\settings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Style.xaml">
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

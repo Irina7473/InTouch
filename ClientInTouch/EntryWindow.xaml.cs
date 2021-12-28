@@ -26,12 +26,12 @@ namespace ClientInTouch
         public Client client;
         IPAddress ip;
         int port;
-        public string Message { get; set; }
+        string message; 
         
         public EntryWindow()
         {
             InitializeComponent();
-            Message = string.Empty;
+            client = new();
             
         }
 
@@ -41,8 +41,15 @@ namespace ClientInTouch
             ip = IPAddress.Parse("127.0.0.1");
             port = 8005;
             client.ConnectToServer(ip, port, TextBox_Login.Text, TextBox_Password.Text);
-            Message = client.Read();
-            this.DialogResult = true;             
+            message = client.Read();
+            //сравнение не работает!!
+            if (message == "admit")
+            {
+                MessageBox.Show("Авторизация пройдена");
+                //распарсить message - взять user.Id
+                this.DialogResult = true;
+            } 
+            else MessageBox.Show("Неверный логин или пароль");                  
         }
 
         private void Button_NowRegister_Click(object sender, RoutedEventArgs e)

@@ -23,9 +23,31 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    <Button Name="Button_Settings" Content="..."
-                            Click="Button_Settings_Click"
-                            Style="{DynamicResource style_Button}" />
+                    <Menu x:Name="Menu" Width="30" Margin="10">
+                        <Menu.Background>
+                            <ImageBrush ImageSource="G:\STEP\InTouch\InTouch\ClientInTouch\Resources\settings.png" />
+                        </Menu.Background>
+                        <MenuItem Width="30" Height="30">
+                            <Button Name="Button_Settings" Content="Подключение"
+                                    Click="Button_Settings_Click" 
+                                    Style="{DynamicResource style_ButtonMenu}"/>
+                            <Separator />
+                            <MenuItem >
+                            
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Администрирование">
+                                <Button Name="Button_AccountSettings" Content="Настройка аккаунтов"
+                                        Click="Button_AccountSettings_Click" 
+                                        Style="{DynamicResource style_ButtonMenu}"/>
+                            
+                        </MenuItem>
+                            <MenuItem Header="О программе" />
+                            <MenuItem Header="Справка" />
+                            
+                        </MenuItem>
+                    </Menu>
+                    
                     <TextBox x:Name="TextBox_SearchContact" Text="Поиск"
                              Width="110" Margin="5" Background="PaleTurquoise" Foreground="Gray"
                              GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>

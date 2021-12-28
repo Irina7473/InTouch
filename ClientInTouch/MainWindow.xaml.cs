@@ -44,6 +44,7 @@ namespace ClientInTouch
             message = string.Empty;
             Notify += log.RecordToLog;
             Client.Notify += log.RecordToLog;
+            Closed += Exit;
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
@@ -53,19 +54,7 @@ namespace ClientInTouch
             entry.client = this.client;
             
             if (entry.ShowDialog() == true)
-            {
-                //сравнение не работает!!
-                if (entry.Message != "admit") MessageBox.Show("Неверный логин или пароль");
-                else
-                {
-                    MessageBox.Show("Авторизация пройдена");
-                    //распарсить entry.Message - взять user.Id
-                    Button_Entry.Content = entry.TextBox_Login.Text; //сюда user.login
-                    taskRead = new(() => { ReceivedAsync(); });
-                    taskRead.Start();
-                }
-                MessageBox.Show("Авторизация пройдена");
-                //распарсить entry.Message - взять user.Id
+            {                
                 Button_Entry.Content = entry.TextBox_Login.Text; //сюда user.login
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();
@@ -205,6 +194,16 @@ namespace ClientInTouch
         }
 
         private void MenuItem_Click_Delete(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Exit(object sender, System.EventArgs e)
+        {
+            client.Close();
+        }
+
+        private void Button_AccountSettings_Click(object sender, RoutedEventArgs e)
         {
 
         }
