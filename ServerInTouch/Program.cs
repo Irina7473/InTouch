@@ -15,8 +15,33 @@ namespace ServerInTouch
             var log = new LogToFile();
             TcpServer.Notify += log.RecordToLog;
             ClientConnection.Notify += log.RecordToLog;
-            var server = new TcpServer(8005, 10);
+
+            int port, amt;
+            Console.WriteLine("Введите номер порта");
+            var stringPort = Console.ReadLine();
+            port = NumberCheck(stringPort);
+            Console.WriteLine("Введите максимальное количество одновременных соединений");
+            var stringAmt = Console.ReadLine();
+            amt = NumberCheck(stringAmt);    
+            var server = new TcpServer(port, amt);
             server.StartTcpServer();
+        }
+
+        static int NumberCheck(string inputString)
+        {            
+            bool correct=false;
+            int number=-1;            
+            do
+            {
+                correct = Int32.TryParse(inputString, out number);
+                if (!correct || number <= 0)
+                {
+                    Console.WriteLine("Введите только целое положительное число");
+                    inputString = Console.ReadLine();
+                }                
+            }
+            while (number<=0);
+            return number;
         }
 
         static void Output(MessageType type,string message)

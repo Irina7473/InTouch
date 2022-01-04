@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Logger;
 
-namespace InTouchServer
+namespace DataBaseActions
 {
     public class DBConnection
     {

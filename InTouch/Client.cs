@@ -13,9 +13,7 @@ namespace InTouchServer
     {
         public static event Action<MessageType, string> Notify;
         public TcpClient client;
-        //private string _macAddress;
-        public NetworkStream _netStream;
-        private User _user;
+        private NetworkStream _netStream;        
 
         public bool Connected { get; set; }
 
@@ -26,45 +24,20 @@ namespace InTouchServer
                 client = new();
                 client.Connect(ip, port);
                 _netStream = client.GetStream();
-                //_macAddress = GetMacAddress();
                 Notify?.Invoke(MessageType.info, $"{DateTime.Now} Соединение с сервером установлено");                
                 Send($"{login} {password}");
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
             }            
-        }
-        /*
-        public void Communication()
-        {            
-            Task taskRead = new(() => {
-                while (client.Connected)
-                {
-                    Read();
-                }
-            });
-            taskRead.Start();            
-        }*/
-
-        /*
-        private string GetMacAddress()
-        {
-            string macAddress = "";
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (nic.OperationalStatus == OperationalStatus.Up)
-                {
-                    macAddress += nic.GetPhysicalAddress().ToString();
-                    break;
-                }
-            }
-            return macAddress;
-        }*/
-
+        }        
+        
         public void Send(string message)
         {
-            try
+            if (client.Connected)
+            {
+                try
             {
                 if (_netStream.CanWrite)
                 {
@@ -82,28 +55,35 @@ namespace InTouchServer
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
             }
         }
+            else
+            {
+                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение разорвано");
+            }
+}
         
         public string Read()
         {
-            try
+            if (client.Connected)
+            {
+                try
             {
                 if (_netStream.CanRead)
                 {
-                    var buffer = new byte [client.ReceiveBufferSize];
+                    var buffer = new byte [10];
                     var data = new List<byte>();
                     do
                     {
                         try
                         {
-                            _netStream.Read(buffer, 0, (int)client.ReceiveBufferSize);
+                            _netStream.Read(buffer, 0, buffer.Length);
                             data.AddRange(buffer);
                         }
-                        catch (Exception exc)
+                        catch (Exception e)
                         {
-                            Notify?.Invoke(MessageType.error, exc.Message);
+                            Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
                             break;
                         }
                     } while (_netStream.DataAvailable);
@@ -117,21 +97,27 @@ namespace InTouchServer
                     Notify?.Invoke(MessageType.error, "Вы не можете читать данные из этого потока.");
                     Close();
                     _netStream.Close();
-                    return "Вы не можете читать данные из этого потока.";
+                    return string.Empty;
                 }               
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
-                return e.ToString();
-            }            
+                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                return string.Empty;
+            }
+            }
+            else
+            {
+                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение разорвано");
+                return string.Empty;
+            }
         }
 
         public void Close()
-        {
-            client.Close();
+        {            
+            if (client !=null) client.Close();
+            if (_netStream !=null) _netStream.Close();
             Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
         }
-
     }
 }

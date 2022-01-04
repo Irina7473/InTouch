@@ -11,13 +11,23 @@
     </Window.Resources>
     <Grid Margin="10">
         <StackPanel>
-            <TextBlock Text="Вход" HorizontalAlignment="Center" FontSize="20" Margin="5" />
+            
+            <TextBox x:Name="TextBox_IP" Text="127.0.0.1" 
+                     Style="{DynamicResource style_TextBoxEntry}" 
+                     GotFocus="TextBox_IP_GotFocus"  LostFocus="TextBox_IP_LostFocus"/>
+            <TextBox x:Name="TextBox_Port" Text="8005" 
+                     Style="{DynamicResource style_TextBoxEntry}" 
+                     GotFocus="TextBox_Port_GotFocus"  LostFocus="TextBox_Port_LostFocus"/>
+            <TextBlock Text="ВХОД" HorizontalAlignment="Center" FontSize="20" Margin="5" />
             <TextBox x:Name="TextBox_Login" Text="Логин" 
                      Style="{DynamicResource style_TextBoxEntry}" 
                      GotFocus="TextBox_Login_GotFocus"  LostFocus="TextBox_Login_LostFocus"/>
             <TextBox x:Name="TextBox_Password" Text="Пароль" 
                      Style="{DynamicResource style_TextBoxEntry}" 
                      GotFocus="TextBox_Password_GotFocus"  LostFocus="TextBox_Password_LostFocus"/>
+            <CheckBox x:Name="CheckBox_Remember"  Content="Запомнить данные"
+                      HorizontalAlignment="Center" Margin="10"
+                      Checked="CheckBox_Remember_Checked" Unchecked="CheckBox_Remember_Unchecked"/>
             <Button x:Name="Button_Entry" Content="Войти" 
                     Click="Button_Entry_Click"  
                     Style="{DynamicResource style_ButtonEntry}" />
@@ -25,7 +35,5 @@
                     Click="Button_NowRegister_Click"  
                     Style="{DynamicResource style_ButtonEntry}" />
         </StackPanel>
-        
-        
     </Grid>
 </Window>

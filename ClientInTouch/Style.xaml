@@ -51,8 +51,7 @@
 
     <Style x:Key="style_ButtonMenu" TargetType="Button">
         <Style.Setters>
-            <Setter Property="HorizontalAlignment" Value="Center" />            
-            <Setter Property="Background" Value="White" />
+            <Setter Property="HorizontalAlignment" Value="Center" /> 
             <Setter Property="BorderThickness" Value="0" />
         </Style.Setters>
         <Style.Triggers>
@@ -118,7 +117,7 @@
             <Setter Property="Foreground" Value="Gray" />
             <Setter Property="Width" Value="200" />
             <Setter Property="Height" Value="30" />
-            <Setter Property="Margin" Value="10" />
+            <Setter Property="Margin" Value="5" />
         </Style.Setters>
     </Style>
     

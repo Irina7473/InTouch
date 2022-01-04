@@ -57,12 +57,14 @@ namespace ClientInTouch
             if (entry.ShowDialog() == true)
             {                
                 Button_Entry.Content = entry.TextBox_Login.Text; //сюда user.login
+                Button_Entry.IsEnabled = false;
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();
             }
             else MessageBox.Show("Авторизация не пройдена");
         }
-                       
+                
+        //Рудимент - удалить в дальнейшем
         private void Button_Settings_Click(object sender, RoutedEventArgs e)
         {
             ip= IPAddress.Parse("127.0.0.1");
@@ -86,7 +88,7 @@ namespace ClientInTouch
                         using (cancelTokenRead = new CancellationTokenSource())
                         { await AppendFormattedTextAsync("server", message, cancelTokenRead.Token); }
                     }
-                    catch (Exception exc) { Notify?.Invoke(MessageType.error, exc.Message); }
+                    catch (Exception exc) { Notify?.Invoke(MessageType.error, $"{DateTime.Now} {exc.ToString()}"); }
                     finally { cancelTokenRead = null; }
                 }
             }
@@ -104,7 +106,6 @@ namespace ClientInTouch
                 if (client.client.Connected)
                 {
                     message = TextBox_Message.Text;
-                    //AppendFormattedText("client", message);
                     if (cancelTokenSend != null) return;
                     try
                     {
@@ -202,7 +203,6 @@ namespace ClientInTouch
         private void Exit(object sender, System.EventArgs e)
         {
             client.Close();
-            this.Close();
         }
 
         private void Button_AccountSettings_Click(object sender, RoutedEventArgs e)
@@ -211,31 +211,3 @@ namespace ClientInTouch
         }
     }
 }
-
-/*
- *      
-        private void Received()
-        {
-            while (client.client.Connected)
-            {
-                message = client.Read();
-                AppendFormattedText("server", message);
-            }
-        }
-
-        private void AppendFormattedText(string type, string text)
-        {
-            TextRange rangeOfWord = new TextRange(RichTextBox_СhatСontent.Document.ContentEnd, RichTextBox_СhatСontent.Document.ContentEnd);
-            rangeOfWord.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Regular);
-            if (type == "server")
-            {
-                rangeOfWord.Text = text + "\r";
-                rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Blue);
-            }
-            if (type == "client")
-            {
-                rangeOfWord.Text = "\t\t" + text + "\r";
-                rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Green);
-            }
-        }
-*/
