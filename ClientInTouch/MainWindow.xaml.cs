@@ -201,6 +201,7 @@ namespace ClientInTouch
         private void Exit(object sender, System.EventArgs e)
         {
             client.Close();
+            this.Close();
         }
 
         private void Button_AccountSettings_Click(object sender, RoutedEventArgs e)

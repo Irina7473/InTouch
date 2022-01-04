@@ -67,10 +67,10 @@ namespace InTouchServer
             
             Task taskSend = new(() => { 
                 Send(netStream, "Hello");
-                for (int i = 0; i < 10; i++) { Send(netStream, "123456789"); Thread.Sleep(1000); }
+                //for (int i = 0; i < 10; i++) { Send(netStream, "123456789"); Thread.Sleep(1000); }
                 Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
             });
-            //taskSend.Start();
+            
             Task taskRead = new(() => {
                 while (client.Connected)
                 {
@@ -80,7 +80,7 @@ namespace InTouchServer
                     Send(netStream, "Доставлено");
                 } });
             taskRead.Start();
-            taskSend.Start();
+            //taskSend.Start();
         }        
 
         public void Send(NetworkStream netStream, string message)

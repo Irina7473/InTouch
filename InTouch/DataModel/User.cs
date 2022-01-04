@@ -10,7 +10,7 @@ namespace InTouchServer
         public string Login { get; set; }
         public string Password { get; set; }
         public string FullName { get; set; }
-        public byte Avatar { get; set; }
-        public List <Chat> Chats { get; set; }
+        public byte Avatar { get; set; }  // Добавит сам user
+        public List <Chat> Chats { get; set; } //формируется из table_Contacts
     }
 }

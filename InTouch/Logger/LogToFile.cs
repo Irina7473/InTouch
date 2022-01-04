@@ -28,7 +28,7 @@ namespace InTouchServer
             var text = type + " " + message + " \n";
             try
             {
-                File.AppendAllTextAsync(TotalPath, text);
+                File.AppendAllTextAsync(TotalPath, text); //STRIMWRITEASYNC
             }
             catch (Exception e)
             {

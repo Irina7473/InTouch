@@ -42,14 +42,18 @@ namespace ClientInTouch
             port = 8005;
             client.ConnectToServer(ip, port, TextBox_Login.Text, TextBox_Password.Text);
             message = client.Read();
+            MessageBox.Show(message);
+           
             //сравнение не работает!!
             if (message == "admit")
             {
                 MessageBox.Show("Авторизация пройдена");
-                //распарсить message - взять user.Id
+                //распарсить message - взять user.name
                 this.DialogResult = true;
             } 
-            else MessageBox.Show("Неверный логин или пароль");                  
+            else MessageBox.Show("Неверный логин или пароль");
+            
+            //this.DialogResult = true;
         }
 
         private void Button_NowRegister_Click(object sender, RoutedEventArgs e)

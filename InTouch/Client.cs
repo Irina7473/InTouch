@@ -18,13 +18,6 @@ namespace InTouchServer
 
         public bool Connected { get; set; }
 
-        /*
-public Client ()
-{
-client = new();
-_netStream = client.GetStream();
-}*/
-
         public void ConnectToServer(IPAddress ip, int port, string login, string password)
         {
             try
@@ -91,7 +84,7 @@ _netStream = client.GetStream();
                 Notify?.Invoke(MessageType.error, e.ToString());
             }
         }
-
+        
         public string Read()
         {
             try
