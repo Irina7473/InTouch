@@ -1,6 +1,6 @@
 ﻿using System;
-
 using InTouchServer;
+using Logger;
 
 namespace ServerInTouch
 {
@@ -17,7 +17,6 @@ namespace ServerInTouch
             ClientConnection.Notify += log.RecordToLog;
             var server = new TcpServer(8005, 10);
             server.StartTcpServer();
-
         }
 
         static void Output(MessageType type,string message)
@@ -37,7 +36,6 @@ namespace ServerInTouch
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }
-
             Console.WriteLine($"{type} {message}");
             Console.ResetColor();
         }

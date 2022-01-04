@@ -13,14 +13,5 @@ namespace InTouchServer
         public string Content { get; set; } //byte[] 
         public string Status { get; set; }
 
-    }
-
-    public enum MessageType
-    {
-        info,
-        warn,
-        error,        
-        text,
-        img
-    }
+    }        
 }

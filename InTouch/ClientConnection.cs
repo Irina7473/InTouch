@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Threading;
+using Logger;
 
 namespace InTouchServer
 {

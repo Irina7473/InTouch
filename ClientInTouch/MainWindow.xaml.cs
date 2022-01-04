@@ -18,6 +18,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using InTouchServer;
+using Logger;
 
 namespace ClientInTouch
 {
