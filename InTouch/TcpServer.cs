@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using Logger;
 
-namespace InTouchServer
+namespace InTouchLibrary
 {
     public class TcpServer
     {

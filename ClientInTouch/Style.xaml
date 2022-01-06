@@ -120,5 +120,22 @@
             <Setter Property="Margin" Value="5" />
         </Style.Setters>
     </Style>
-    
+
+    <Style x:Key="style_TextBlockChat" TargetType="TextBlock">
+        <Style.Setters>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="DarkCyan" />
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Margin" Value="5" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="style_ListBoxItem" TargetType="ListBoxItem">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">               
+                <Setter Property="Background" Value="PaleTurquoise" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

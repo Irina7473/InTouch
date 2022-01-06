@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InTouchServer", "InTouch\InTouchServer.csproj", "{5A014240-B71C-498E-AF02-D4F58EB6FD9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InTouchLibrary", "InTouch\InTouchLibrary.csproj", "{5A014240-B71C-498E-AF02-D4F58EB6FD9C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerInTouch", "ServerInTouch\ServerInTouch.csproj", "{CDBD55E9-2C0F-464B-95D7-4AAB8AE9FC27}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientInTouch", "ClientInTo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csproj", "{F36C5680-F21E-4DBD-A020-AB2E6B603857}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseActions", "DataBaseActions\DataBaseActions.csproj", "{0E812675-EA5B-4A0F-8969-1374FC989E75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBaseActions", "DataBaseActions\DataBaseActions.csproj", "{0E812675-EA5B-4A0F-8969-1374FC989E75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -17,7 +18,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using InTouchServer;
+using InTouchLibrary;
+using DataBaseActions;
 using Logger;
 
 namespace ClientInTouch
@@ -37,6 +39,8 @@ namespace ClientInTouch
         public Task taskRead;
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
+
+        ObservableCollection<Chat> chats;
         public MainWindow()
         {
             InitializeComponent();
@@ -47,6 +51,8 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
+            chats = new ObservableCollection<Chat> {new Chat("chat1"), new Chat("chat2"), new Chat("chat3") };
+            ChatsList.ItemsSource = chats;
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)

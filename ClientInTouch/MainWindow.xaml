@@ -25,7 +25,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Menu x:Name="Menu" Width="30" Margin="10">
                         <Menu.Background>
-                            <ImageBrush ImageSource="G:\STEP\InTouch\InTouch\ClientInTouch\Resources\settings.png" />
+                            <ImageBrush ImageSource= "pack://application:,,,/Resources\settings.png" />
                         </Menu.Background>
                         <MenuItem Width="30" Height="30">
                             <Button Name="Button_Settings" Content="Подключение"
@@ -57,21 +57,24 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" >
-                <ListView Name="ContactsList">
-                <ListView.View >
-                    <GridView >
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="150"></GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
-                    </GridView>
-                </ListView.View>
-                <ListView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
-                        <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
-                    </ContextMenu>
-                </ListView.ContextMenu>
-                </ListView>
+                <ListBox Name="ChatsList" Background="AliceBlue" >                    
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="Image_Avatar" Source="{Binding Avatar}"
+                                   Width="40" />
+                                <TextBlock x:Name="TextBlock_ChatName" Text="{Binding Name}"
+                                       Style="{DynamicResource style_TextBlockChat}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
+                            <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </ListBox>
             </Grid>
         </Grid>
         
@@ -95,7 +98,7 @@
             <Grid Grid.Row="1">
                 <ScrollViewer>
                     <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                              Background="AliceBlue"   Margin="10" />
+                              Background="AliceBlue" />
                 </ScrollViewer>
             </Grid>
             <Grid Grid.Row="3">

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace InTouchServer
+namespace DataBaseActions
 {
     public class User
     {

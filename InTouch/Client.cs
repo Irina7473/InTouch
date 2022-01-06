@@ -7,7 +7,7 @@ using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Logger;
 
-namespace InTouchServer
+namespace InTouchLibrary
 {
     public class Client
     {

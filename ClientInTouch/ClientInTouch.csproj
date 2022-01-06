@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InTouch\InTouchServer.csproj" />
+    <ProjectReference Include="..\DataBaseActions\DataBaseActions.csproj" />
+    <ProjectReference Include="..\InTouch\InTouchLibrary.csproj" />
+    <ProjectReference Include="..\Logger\Logger.csproj" />
   </ItemGroup>
 
   <ItemGroup>

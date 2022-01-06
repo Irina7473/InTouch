@@ -9,7 +9,7 @@ using System.Threading;
 using Logger;
 using DataBaseActions;
 
-namespace InTouchServer
+namespace InTouchLibrary
 {
     public class ClientConnection
     {

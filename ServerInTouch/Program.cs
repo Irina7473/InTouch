@@ -1,5 +1,5 @@
 ﻿using System;
-using InTouchServer;
+using InTouchLibrary;
 using Logger;
 
 namespace ServerInTouch

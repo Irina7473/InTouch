@@ -14,8 +14,6 @@
     <Compile Remove="DBConnection.cs" />
     <Compile Remove="IServiceChat.cs" />
     <Compile Remove="Message.cs" />
-    <Compile Remove="protoсol\UdpMulticast.cs" />
-    <Compile Remove="protoсol\UdpParty.cs" />
     <Compile Remove="User.cs" />
   </ItemGroup>
 
