@@ -124,13 +124,13 @@ namespace InTouchServer
                     if (_netStream.CanRead)
                     {
                         var buffer = new byte[256];
-                        var data = new List<byte>();
+                        var data = new StringBuilder();
                         do
                         {
                             try
                             {
-                                _netStream.Read(buffer, 0, buffer.Length);
-                                data.AddRange(buffer);
+                                int bytes = _netStream.Read(buffer, 0, buffer.Length);
+                                data.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
                             }
                             catch (Exception e)
                             {
@@ -138,10 +138,9 @@ namespace InTouchServer
                                 break;
                             }
                         } while (_netStream.DataAvailable);
-                        var t = data.ToArray();
-                        var message = Encoding.Unicode.GetString(t, 0, t.Length);
-                        Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {message} ");
-                        return message;
+                        
+                        Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {data.ToString()} ");
+                        return data.ToString();
                     }
                     else
                     {

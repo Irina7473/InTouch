@@ -49,6 +49,7 @@ namespace ClientInTouch
             }
             else
             {
+                ip = IPAddress.Parse( TextBox_IP.Text);
                 var correct = Int32.TryParse(TextBox_Port.Text.ToString(), out port);
                 if (!correct || port<=0)
                 {

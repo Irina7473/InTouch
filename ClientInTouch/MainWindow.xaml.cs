@@ -46,6 +46,7 @@ namespace ClientInTouch
             Notify += log.RecordToLog;
             Client.Notify += log.RecordToLog;
             Closed += Exit;
+            RichTextBox_СhatСontent.IsEnabled = false;
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
