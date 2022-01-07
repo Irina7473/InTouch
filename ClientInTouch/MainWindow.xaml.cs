@@ -40,6 +40,7 @@ namespace ClientInTouch
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
 
+        User user;
         ObservableCollection<Chat> chats;
         public MainWindow()
         {
@@ -51,6 +52,7 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
+            user = new ();
             chats = new ObservableCollection<Chat> {new Chat("chat1"), new Chat("chat2"), new Chat("chat3") };
             ChatsList.ItemsSource = chats;
         }
@@ -60,6 +62,7 @@ namespace ClientInTouch
             EntryWindow entry = new EntryWindow();
             entry.Owner = this;
             entry.client = this.client;
+            entry.user = this.user;
             
             if (entry.ShowDialog() == true)
             {                
@@ -105,7 +108,33 @@ namespace ClientInTouch
                 MessageBox.Show("Соединение с сервером разорвано");
             }
         }
-        
+
+        private void Button_AddChat_Click(object sender, RoutedEventArgs e)
+        {
+            // выбор чат или диалог с 1
+            //если чат - имя, для 1 взять логин собеседника
+            //если чат - выбор аватар, для 1 взять аватар собеседника, по умолчанию аватар из ресурсов
+            //запрос в БД списка user, выбор нужных
+            // создание Chat(string name, byte[] avatar, List<User> users) 
+        }
+
+        private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var chat = (Chat)((ListBox)sender).SelectedItem;
+            if (chat.Messages != null)
+            {
+                foreach (var mes in chat.Messages)
+                {
+                    //RichTextBox_СhatСontent.AppendText(mes.Content);
+                    string type = string.Empty;
+                    if (mes.SenderId == client.UserId) type = "client";
+                    else type = "server";
+                    AppendFormattedText(type, mes.Content);
+                }
+            }
+            else RichTextBox_СhatСontent.Document.Blocks.Clear();
+        }
+
         private async void Button_Send_Click(object sender, RoutedEventArgs e)
         {
             if (client.client != null)
@@ -137,31 +166,6 @@ namespace ClientInTouch
             }
         }      
 
-        private async Task AppendFormattedTextAsync(string type, string text, CancellationToken token)
-        {
-            await RichTextBox_СhatСontent.Dispatcher.Invoke(async () =>
-            {
-                TextRange rangeOfWord = new TextRange(RichTextBox_СhatСontent.Document.ContentEnd, RichTextBox_СhatСontent.Document.ContentEnd);
-                rangeOfWord.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Regular);
-                if (type == "server")
-                {
-                    rangeOfWord.Text = text + "\r";
-                    rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Blue);
-                }
-                if (type == "client")
-                {
-                    rangeOfWord.Text = "\t\t" + text + "\r";
-                    rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Green);
-                }
-                await Task.Delay(10, token);
-            }, DispatcherPriority.Normal, token);
-        }
-
-        private void Button_AddChat_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void TextBox_SearchContact_GotFocus(object sender, RoutedEventArgs e)
         {
             if (TextBox_SearchContact.Text == "Поиск")
@@ -170,7 +174,6 @@ namespace ClientInTouch
                 TextBox_SearchContact.Foreground = Brushes.DarkGreen;
             }
         }
-
         private void TextBox_SearchContact_LostFocus(object sender, RoutedEventArgs e)
         {
             if (TextBox_SearchContact.Text == "")
@@ -179,7 +182,6 @@ namespace ClientInTouch
                 TextBox_SearchContact.Foreground = Brushes.Gray;
             }
         }
-
         private void TextBox_Message_GotFocus(object sender, RoutedEventArgs e)
         {
             if (TextBox_Message.Text == "Написать сообщение")
@@ -201,7 +203,6 @@ namespace ClientInTouch
         {
 
         }
-
         private void MenuItem_Click_Delete(object sender, RoutedEventArgs e)
         {
 
@@ -216,5 +217,43 @@ namespace ClientInTouch
         {
 
         }
+         
+        private void AppendFormattedText(string type, string text)
+        {
+            TextRange rangeOfWord = new TextRange(RichTextBox_СhatСontent.Document.ContentEnd, RichTextBox_СhatСontent.Document.ContentEnd);
+            rangeOfWord.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Regular);
+            if (type == "server")
+            {
+                rangeOfWord.Text = text + "\r";
+                rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Blue);
+            }
+            if (type == "client")
+            {
+                rangeOfWord.Text = "\t\t" + text + "\r";
+                rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.DarkGreen);
+            }
+                
+        }
+
+        private async Task AppendFormattedTextAsync(string type, string text, CancellationToken token)
+        {
+            await RichTextBox_СhatСontent.Dispatcher.Invoke(async () =>
+            {
+                TextRange rangeOfWord = new TextRange(RichTextBox_СhatСontent.Document.ContentEnd, RichTextBox_СhatСontent.Document.ContentEnd);
+                rangeOfWord.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Regular);
+                if (type == "server")
+                {
+                    rangeOfWord.Text = text + "\r";
+                    rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Blue);
+                }
+                if (type == "client")
+                {
+                    rangeOfWord.Text = "\t\t" + text + "\r";
+                    rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Green);
+                }
+                await Task.Delay(10, token);
+            }, DispatcherPriority.Normal, token);
+        }
+
     }
 }

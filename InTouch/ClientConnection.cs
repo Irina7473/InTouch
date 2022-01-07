@@ -50,13 +50,14 @@ namespace InTouchLibrary
             {
                 // user= user из БД
                 user = new();
-                Send("admit");
+                user.Id = 10;
+                Send($"ident|admit|{user.Id.ToString()}");
                 return true;
             }
             else
             {
                 // если нет такого
-                Send("prevent");
+                Send("prevent|-1");
                 return false;
             }
         }

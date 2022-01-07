@@ -14,6 +14,7 @@ namespace Logger
         info,
         warn,
         error,
+        ident,
         text,
         img
     }

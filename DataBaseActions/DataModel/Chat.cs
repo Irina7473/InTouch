@@ -11,7 +11,14 @@ namespace DataBaseActions
         public byte[] Avatar { get; set; }
         public bool Security { get; set; }   
         public List<User> Users { get; set; } //формируется из table_Contacts
+        public List<Message> Messages { get; set; } //формируется из table_Messages
 
+        public Chat(string name, byte[] avatar, List<User> users)
+        {
+            Name = name;
+            Avatar = avatar;
+            Users = users;
+        }
         public Chat(string name, byte[] avatar)
         {
             Name = name;

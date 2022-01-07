@@ -8,7 +8,7 @@ namespace DataBaseActions
     public class DBConnection
     {
         public static event Action<MessageType, string> Notify;
-        string connectionString = "Server=mysql60.hostland.ru;Database=host1323541_shambala1;Uid=host1323541_itstep;Pwd=269f43dc;";
+        string connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;";
 
         private MySqlConnection _connection;
         private MySqlCommand _query;
@@ -152,10 +152,10 @@ namespace DataBaseActions
             }
         }
 
-        private string FindUserName(int idUser)
+        public string FindUserName(int idUser)
         {          
             _connection.Open();
-            _query.CommandText = "SELECT id, name FROM table_Users;";
+            _query.CommandText = $"SELECT login FROM table_users where id='{idUser}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
@@ -164,8 +164,14 @@ namespace DataBaseActions
             }
             else
             {
+                string nameUser=string.Empty;
+                while (result.Read())
+                {
+                    nameUser = result.GetString(0);
+                }
+                /*
                 string nameUser = string.Empty;
-                string name = string.Empty;
+                /*string name = string.Empty;
                 int id = -1;
                 do
                 {
@@ -180,9 +186,9 @@ namespace DataBaseActions
                         nameUser = name;
                     }
                 } while (result.NextResult());
-                if (result != null) result.Close();
+                if (result != null) result.Close();*/
                 _connection.Close();
-                if (nameUser==string.Empty) Notify?.Invoke(MessageType.warn, $"Нет данных о пользователе {idUser}");
+               // if (nameUser==string.Empty) Notify?.Invoke(MessageType.warn, $"Нет данных о пользователе {idUser}");
                 return nameUser;
             }
         }
@@ -222,10 +228,10 @@ namespace DataBaseActions
             }
         }
 
-        private string FindChatName(int idChat)
+        public string FindChatName(int idChat)
         {
             _connection.Open();
-            _query.CommandText = "SELECT id, name FROM table_Users;";
+            _query.CommandText = "SELECT id, chatName FROM table_chats;";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
@@ -288,7 +294,7 @@ namespace DataBaseActions
             }
         }
 
-        public List<int> UpdateListChats(int idUser)
+        public List<Chat> UpdateListChats(int idUser)
         {
             _connection.Open();
             _query.CommandText = "SELECT chatId, userId FROM table_Contacts;";
@@ -300,7 +306,7 @@ namespace DataBaseActions
             }
             else
             {
-                var chats = new List<int>();
+                var chats = new List<Chat>();
                 do
                 {
                     while (result.Read())
@@ -309,7 +315,7 @@ namespace DataBaseActions
                         if (idUs == idUser)
                         {
                             var idCh = result.GetInt32(0);
-                            chats.Add(idCh);
+
                         }
                     }
                 } while (result.NextResult());

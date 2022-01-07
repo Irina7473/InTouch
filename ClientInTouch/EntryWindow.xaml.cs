@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using InTouchLibrary;
+using DataBaseActions;
 
 namespace ClientInTouch
 {
@@ -28,8 +29,9 @@ namespace ClientInTouch
         int port;
         string login;
         string password;
-        string message; 
-        
+        string message;
+        public User user;
+
         public EntryWindow()
         {
             InitializeComponent();
@@ -37,6 +39,7 @@ namespace ClientInTouch
             login = string.Empty;
             password = string.Empty;
             message = string.Empty;
+            user = new();
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
@@ -61,11 +64,13 @@ namespace ClientInTouch
                     password = TextBox_Password.Text.ToString();
                     client.ConnectToServer(ip, port, login, password);
                     message = client.Read();
-                    MessageBox.Show(message);
-                    //сравнение не работает из-за буфера!!
-                    if (message == "admit")
+                    //добавить разбор сообщения по типу
+                    var ident = message.Split('|');
+                    var check = ident[1];
+                    if (check == "admit")
                     {
-                        MessageBox.Show("Авторизация пройдена");
+                        client.UserId = Int32.Parse(ident[2]);
+                        MessageBox.Show($"{client.UserId.ToString()} авторизован");
                         this.DialogResult = true;
                     }
                     else MessageBox.Show("Неверный логин или пароль");

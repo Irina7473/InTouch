@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Logger;
+using DataBaseActions;
 
 namespace InTouchLibrary
 {
@@ -13,7 +14,8 @@ namespace InTouchLibrary
     {
         public static event Action<MessageType, string> Notify;
         public TcpClient client;
-        private NetworkStream _netStream;        
+        private NetworkStream _netStream;
+        public int UserId { get; set; }
 
         public bool Connected { get; set; }
 

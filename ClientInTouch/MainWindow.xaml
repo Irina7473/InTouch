@@ -13,7 +13,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
@@ -57,7 +57,7 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" >
-                <ListBox Name="ChatsList" Background="AliceBlue" >                    
+                <ListBox Name="ChatsList" Background="AliceBlue" SelectionChanged="ChatsList_SelectionChanged">                    
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">

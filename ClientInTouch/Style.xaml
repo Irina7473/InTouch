@@ -125,7 +125,7 @@
         <Style.Setters>
             <Setter Property="FontSize" Value="20" />
             <Setter Property="Foreground" Value="DarkCyan" />
-            <Setter Property="Width" Value="40" />
+            <Setter Property="Width" Value="200" />
             <Setter Property="Margin" Value="5" />
         </Style.Setters>
     </Style>
