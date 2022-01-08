@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Logger;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace DataBaseActions
 {
@@ -31,17 +33,14 @@ namespace DataBaseActions
             catch (InvalidOperationException)
             {
                 Notify?.Invoke(MessageType.error, "Ошибка открытия БД");
-                throw new Exception("Ошибка открытия БД");                
             }
             catch (MySqlException)
             {
                 Notify?.Invoke(MessageType.error, "Подключаемся к уже открытой БД");
-                throw new Exception("Подключаемся к уже открытой БД");
             }
             catch (Exception)
             {
                 Notify?.Invoke(MessageType.error, "Путь к базе данных не найден");
-                throw new Exception("Путь к базе данных не найден");
             }
         }
                 
@@ -50,37 +49,39 @@ namespace DataBaseActions
             _connection.Close();
         }
 
-        private MySqlDataReader SelectQuery(string sql)
+        /*private MySqlDataReader SelectQuery(string sql)
         {
             _query.CommandText = sql;
             var result = _query.ExecuteReader();
             return result;
-        }
+        }*/
 
         public void RecordToUser(string message)
         {            
             var user = message.Split('|');
             var login= user[0];
             var password = user[1];
-            var fullName = user[2];
+            var avatar = user[2];
 
-            _connection.Open();
-            _query.CommandText = $"INSERT INTO table_Users (login, password, fullName)" +
-                    $"VALUES ('{login}', '{password}', '{fullName}')";
-            _query.ExecuteNonQuery();
-            _connection.Close();
+            Open();
+            _query.CommandText = $"INSERT INTO table_users (login, password, avatar)" +
+                    $"VALUES ('{login}', '{password}', '{avatar}')";
+            try { _query.ExecuteNonQuery(); }
+            catch { Notify?.Invoke(MessageType.warn, "Пользователь с таким именем существует"); }
+            Close();
         }
 
         public void RecordToChat(string message)
         {
             var chat = message.Split('|');
-            var name = chat[0];
-            var security = chat[1];  //как его сделать bool?
-            _connection.Open();
-            _query.CommandText = $"INSERT INTO table_Chats (name, security)" +
-                    $"VALUES ('{name}', '{security}')";
-            _query.ExecuteNonQuery();
-            _connection.Close();
+            var chatName = chat[0];
+            var avatar = chat[1];  //как его сделать bool?
+           Open();
+            _query.CommandText = $"INSERT INTO table_chats (chatName, avatar)" +
+                    $"VALUES ('{chatName}', '{avatar}')";
+            try { _query.ExecuteNonQuery(); }
+            catch { Notify?.Invoke(MessageType.warn, "Чат с таким именем существует"); }
+            Close();
         }
 
         public void RecordToContact(string message)
@@ -90,239 +91,205 @@ namespace DataBaseActions
             var chatId = FindChatId(chat);
             var user = contact[1];
             var userId = FindUserId(user);
+            if (chatId != -1)
+            {
+                if (userId != -1)
+                {
+                    Open();
+                    _query.CommandText = $"SELECT chatId, userId FROM table_contacts WHERE chatId='{chatId}' AND userId='{userId}';";
+                    var result = _query.ExecuteReader();
+                    if (result.HasRows) Notify?.Invoke(MessageType.warn, $"В чате {chatId} есть контакт {userId}");
+                    else
+                    {
+                        result.Close();
+                        _query.CommandText = $"INSERT INTO table_contacts (chatId, userId)" +
+                            $"VALUES ({chatId}, {userId})";
+                        try { _query.ExecuteNonQuery(); }
+                        catch { Notify?.Invoke(MessageType.error, $"Не удалось добавить пользователя {userId} в чат {chatId}"); }
+                    }
+                    Close();
+                }
+                else Notify?.Invoke(MessageType.error, "Не найден пользователь");
 
-            _connection.Open();
-            _query.CommandText = $"INSERT INTO table_Contacts (chatId, userId)" +
-                    $"VALUES ('{chatId}', '{userId}')";
-            _query.ExecuteNonQuery();
-            _connection.Close();
+            }
+            else Notify?.Invoke(MessageType.error, "Не найден чат");
         }
 
         public void RecordToMessage(string message)
         {
             var mess = message.Split('|');
-            var dateTime = mess[0];
-            var sender = mess[1];
+            var messageType = mess[0];
+            var time = Convert.ToDateTime( mess[1]);
+            var sender = mess[2];
             var senderId = FindUserId(sender);
-            var chat = mess[2];
+            var chat = mess[3];
             var chatId = FindChatId(chat);
-            var messageType = mess[3];
             var content = mess[4];
-            
-            _connection.Open();
-            _query.CommandText = $"INSERT INTO table_Messages (dateTime, senderId, chatId, messageType, content" +
-                    $"VALUES ('{dateTime}', '{senderId}', '{chatId}', '{messageType}', '{content}')";
-            _query.ExecuteNonQuery();
-            _connection.Close();
+            //var content = Encoding.Unicode.GetBytes(mess[4]);
+
+            Open();
+            _query.CommandText = $"INSERT INTO table_messages (messageType, time, senderId, chatId, content)" +
+                    $"VALUES ('{messageType}', '{time}', {senderId}, {chatId}, '{content}')";
+            try { _query.ExecuteNonQuery(); }
+            catch (Exception e) { Notify?.Invoke(MessageType.error, e.ToString()); }
+            Close();
         }
 
+
         //Запросы к БД
-        private int FindUserId (string nameUser)
-        {            
-            _connection.Open();
-            _query.CommandText = "SELECT id, name FROM table_Users;";
+        public int FindUserId (string nameUser)
+        {
+            Open();
+            _query.CommandText = $"SELECT id FROM table_users where login='{nameUser}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
                 Notify?.Invoke(MessageType.warn, "Нет данных в таблице пользователей");
+                Close();
                 return -1;
             }
             else
             {
-                int idUser = -1;
-                int id = -1;
-                string name = string.Empty;                
-                do
-                {
-                    while (result.Read())
-                    {
-                        do
-                        {
-                            id = result.GetInt32(0);
-                            name = result.GetString(1);
-                        }
-                        while (name != nameUser);
-                        idUser = id;
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();
-                _connection.Close();
-                if (idUser == -1) Notify?.Invoke(MessageType.warn, $"Нет данных о пользователе {nameUser}");
+                result.Read();
+                int idUser = result.GetInt32(0);
+                Close();
                 return idUser;
             }
         }
 
         public string FindUserName(int idUser)
         {          
-            _connection.Open();
+            Open();
             _query.CommandText = $"SELECT login FROM table_users where id='{idUser}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
                 Notify?.Invoke(MessageType.warn, "Нет данных в таблице пользователей");
+                Close();
                 return null;
             }
             else
             {
-                string nameUser=string.Empty;
-                while (result.Read())
-                {
-                    nameUser = result.GetString(0);
-                }
-                /*
-                string nameUser = string.Empty;
-                /*string name = string.Empty;
-                int id = -1;
-                do
-                {
-                    while (result.Read())
-                    {
-                        do
-                        {
-                            id = result.GetInt32(0);
-                            name = result.GetString(1);
-                        }
-                        while (id != idUser) ;
-                        nameUser = name;
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();*/
-                _connection.Close();
-               // if (nameUser==string.Empty) Notify?.Invoke(MessageType.warn, $"Нет данных о пользователе {idUser}");
-                return nameUser;
+                result.Read();
+                string nameUser = result.GetString(0);
+               Close();
+               if (nameUser==string.Empty) Notify?.Invoke(MessageType.warn, $"Имя пользователя {idUser} не задано");
+               return nameUser;
             }
         }
 
-        private int FindChatId(string nameChat)
+        public int FindChatId(string nameChat)
         {
-            _connection.Open();
-            _query.CommandText = "SELECT id, name FROM table_Chats;";
+            Open();
+            _query.CommandText = $"SELECT id FROM table_chats where chatName='{nameChat}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
                 Notify?.Invoke(MessageType.warn, "Нет данных в таблице чатов");
+                Close();
                 return -1;
             }
             else
             {
-                int idChat = -1;
-                int id = -1;
-                string name = string.Empty;
-                do
-                {
-                    while (result.Read())
-                    {
-                        do
-                        {
-                            id = result.GetInt32(0);
-                            name = result.GetString(1);
-                        }
-                        while (name != nameChat);
-                        idChat = id;
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();
-                _connection.Close();
-                if (idChat == -1) Notify?.Invoke(MessageType.warn, $"Нет данных о чате {nameChat}");
+                result.Read();
+                int idChat = result.GetInt32(0);
+                Close();
                 return idChat;
             }
         }
 
         public string FindChatName(int idChat)
         {
-            _connection.Open();
-            _query.CommandText = "SELECT id, chatName FROM table_chats;";
+            //if (_connection.State.ToString()!="Open") 
+            Open();
+            _query.CommandText = $"SELECT chatName FROM table_chats where id='{idChat}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
-                Notify?.Invoke(MessageType.warn, "Нет данных в таблице пользователей");
+                Notify?.Invoke(MessageType.warn, "Нет данных в таблице чатов");
+                Close();
                 return null;
             }
             else
             {
-                string nameChat = string.Empty;
-                string name = string.Empty;
-                int id = -1;
-                do
-                {
-                    while (result.Read())
-                    {
-                        do
-                        {
-                            id = result.GetInt32(0);
-                            name = result.GetString(1);
-                        }
-                        while (id != idChat);
-                        nameChat = name;
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();
-                _connection.Close();
-                if (nameChat == string.Empty) Notify?.Invoke(MessageType.warn, $"Нет данных о чате {idChat}");
+                result.Read();
+                string nameChat = result.GetString(0);
+                Close();
+                if (nameChat == string.Empty) Notify?.Invoke(MessageType.warn, $"Имя чата {idChat} не задано");
                 return nameChat;
             }
         }
 
-        public List<int> UpdateListUsers(int idChat)
+        
+        public List<string> ReceiveListUsers(int idChat)
         {
-            _connection.Open();
-            _query.CommandText = "SELECT chatId, userId FROM table_Contacts;";
+            Open();
+            _query.CommandText = $"SELECT login FROM table_users AS u INNER JOIN table_contacts AS c ON u.id=c.userId WHERE chatId='{idChat}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
-                Notify?.Invoke(MessageType.warn, "Нет данных в таблице контактов");
+                Notify?.Invoke(MessageType.warn, $"Нет данных в таблице контактов о чате {idChat}");
+                Close();
                 return null;
             }
-            else {
-                var users = new List<int>();
-                do
+            else 
+            {
+                var users = new List<string>();
+                while (result.Read())
                 {
-                    while (result.Read())
-                    {
-                        var idCh = result.GetInt32(0);
-                        if (idCh == idChat)
-                        {
-                            var idUs = result.GetInt32(1);
-                            users.Add(idUs);
-                        }
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();
-                _connection.Close();
-                if (users.Count == 0) Notify?.Invoke(MessageType.warn, $"Нет данных о чате {idChat}");
+                    var user = result.GetString(0);
+                    users.Add(user);
+                }
+                Close();
                 return users;
             }
         }
-
-        public List<Chat> UpdateListChats(int idUser)
+        
+        public List<string> ReceiveListChats(int idUser)
         {
-            _connection.Open();
-            _query.CommandText = "SELECT chatId, userId FROM table_Contacts;";
+            Open();
+            _query.CommandText = $"SELECT chatName FROM table_chats AS ch INNER JOIN table_contacts AS co ON ch.id = co.chatId WHERE userId='{idUser}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
-                Notify?.Invoke(MessageType.warn, "Нет данных в таблице контактов");
+                Notify?.Invoke(MessageType.warn, $"Нет данных в таблице контактов о пользователе {idUser}");
+                Close();
                 return null;
             }
             else
             {
-                var chats = new List<Chat>();
-                do
+                var chats = new List<string>();
+                while (result.Read())
                 {
-                    while (result.Read())
-                    {
-                        var idUs = result.GetInt32(1);
-                        if (idUs == idUser)
-                        {
-                            var idCh = result.GetInt32(0);
-
-                        }
-                    }
-                } while (result.NextResult());
-                if (result != null) result.Close();
-                _connection.Close();
-                if (chats.Count == 0) Notify?.Invoke(MessageType.warn, $"Нет данных о пользователе {idUser}");
+                    var chat = result.GetString(0);
+                    chats.Add(chat);
+                }
+                Close();
                 return chats;
+            }
+        }
+
+        public List<string> FindMessageToChat(string nameChat)
+        {
+            Open();
+            _query.CommandText = $"SELECT * FROM table_messages AS m INNER JOIN table_chats AS c ON m.chatId = c.id WHERE chatName='{nameChat}';";
+            var result = _query.ExecuteReader();
+            if (!result.HasRows)
+            {
+                Notify?.Invoke(MessageType.warn, $"Нет сообщений в чате {nameChat}");
+                Close();
+                return null;
+            }
+            else
+            {
+                var messages = new List<string>();
+                while (result.Read())
+                {
+                    var mes = result.GetString(1)+ result.GetDateTime(2) + result.GetString(3) + result.GetString(5);
+                    messages.Add(mes);
+                }
+                Close();
+                return messages;
             }
         }
     }
