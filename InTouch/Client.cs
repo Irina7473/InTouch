@@ -7,15 +7,16 @@ using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Logger;
 using DataBaseActions;
+using System.Text.Json;
 
 namespace InTouchLibrary
 {
     public class Client
     {
-        public static event Action<MessageType, string> Notify;
+        public static event Action<LogType, string> Notify;
         public TcpClient client;
         private NetworkStream _netStream;
-        public int UserId { get; set; }
+        public DMUser user;
 
         public bool Connected { get; set; }
 
@@ -26,15 +27,24 @@ namespace InTouchLibrary
                 client = new();
                 client.Connect(ip, port);
                 _netStream = client.GetStream();
-                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Соединение с сервером установлено");                
-                Send($"{login} {password}");
+                Notify?.Invoke(LogType.info, $"{DateTime.Now} Соединение с сервером установлено");
+                string message = JsonSerializer.Serialize<MessageIdent>(new MessageIdent(MessageType.ident, login, password));
+                Send(message);
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
             }            
         }        
         
+        public DMUser ReceiveUser()
+        {
+            var message = Read();
+            var mesCreat = JsonSerializer.Deserialize<MessageSendUser>(message);
+            if (mesCreat.Type == MessageType.user) user= mesCreat.User;
+            return user;
+        }
+
         public void Send(string message)
         {
             if (client.Connected)
@@ -45,11 +55,11 @@ namespace InTouchLibrary
                 {
                     Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
                     _netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Передано сообщение {message}");
+                    Notify?.Invoke(LogType.text, $"{DateTime.Now} Передано сообщение {message}");
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток.");
+                    Notify?.Invoke(LogType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток.");
                     Close();
                     _netStream.Close();
                     return;
@@ -57,12 +67,12 @@ namespace InTouchLibrary
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
             }
         }
             else
             {
-                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение разорвано");
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение разорвано");
             }
 }
         
@@ -85,17 +95,17 @@ namespace InTouchLibrary
                         }
                         catch (Exception e)
                         {
-                            Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                            Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                             break;
                         }
                     } while (_netStream.DataAvailable);
                                         
-                    Notify?.Invoke(MessageType.text, $"{DateTime.Now} Получено сообщение {data.ToString()}");
+                    Notify?.Invoke(LogType.text, $"{DateTime.Now} Получено сообщение {data.ToString()}");
                     return data.ToString();
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете читать данные из этого потока.");
+                    Notify?.Invoke(LogType.error, "Вы не можете читать данные из этого потока.");
                     Close();
                     _netStream.Close();
                     return string.Empty;
@@ -103,13 +113,13 @@ namespace InTouchLibrary
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                 return string.Empty;
             }
             }
             else
             {
-                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение разорвано");
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение разорвано");
                 return string.Empty;
             }
         }
@@ -118,7 +128,7 @@ namespace InTouchLibrary
         {            
             if (client !=null) client.Close();
             if (_netStream !=null) _netStream.Close();
-            Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
+            Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
         }
     }
 }

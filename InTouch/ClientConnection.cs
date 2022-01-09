@@ -8,16 +8,17 @@ using System.Threading.Tasks;
 using System.Threading;
 using Logger;
 using DataBaseActions;
+using System.Text.Json;
 
 namespace InTouchLibrary
 {
     public class ClientConnection
     {
-        public static event Action<MessageType, string> Notify;
+        public static event Action<LogType, string> Notify;
         public int numberTouch;
         public TcpClient client;
         private NetworkStream _netStream;
-        public User user;
+        public DMUser user;
 
         public void ConnectToClient(TcpClient connection, int number)
         {
@@ -29,50 +30,57 @@ namespace InTouchLibrary
                 var ident = Identification(numberTouch);
                 if (ident)
                 {
+                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.ident, $"{user.Login} авторизован"));
+                    Send(message);
+                    Notify?.Invoke(LogType.info, $"{DateTime.Now} Для соединения {numberTouch} успешный вход");
                     Communication();
                 }
-                else Close();
+                else
+                {
+                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.error, "Неверный логин или пароль"));
+                    Send(message);
+                    Close();
+                    Notify?.Invoke(LogType.warn, $"{DateTime.Now} Для соединения {numberTouch} неверный логин или пароль");
+                }
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, $"{DateTime.Now} Для соединения {numberTouch} {e.ToString()}");
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} Для соединения {numberTouch} {e.ToString()}");
             }
         }
 
         public bool Identification(int numberTouch)
+        // Проверка клиента по логину-паролю
         {
-
             var message = Read();
-            //распарсить 1 сообщение клиента
-            // Проверка клиента или регистрация нового, по логину-паролю
-            var found = true;
-            if (found) //написать условие
-            {
-                // user= user из БД
-                user = new();
-                user.Id = 10;
-                Send($"ident|admit|{user.Id.ToString()}");
-                return true;
-            }
+            var mesCreat = JsonSerializer.Deserialize<MessageIdent>(message);
+            if ( mesCreat.Type != MessageType.ident) return false;
             else
             {
-                // если нет такого
-                Send("prevent|-1");
-                return false;
+                var db = new DBConnection();
+                user = db.FindUser(mesCreat.Login, mesCreat.Password);
+                if (user!=null) return true;
+                else return false;
             }
         }
 
         public void Communication()
         {
-            // Передать user его чаты
-            // Если есть сообщения, то передать
-            // Запуск чтения и передачи
+            // Передаю user и его чаты
+            var message = JsonSerializer.Serialize<MessageSendUser>(new MessageSendUser(MessageType.user, user));
+            Notify?.Invoke(LogType.info, message);
+            Send(message);
+
+            // Если есть в чатах сообщения, то передать
             
+            /*
             Task taskSend = new(() => { 
                 Send("Hello");                
-                Notify?.Invoke(MessageType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
+                Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
             });
-            
+            //taskSend.Start();*/
+
+            // Запуск чтения 
             Task taskRead = new(() => {
                 while (client.Connected)
                 {
@@ -99,7 +107,7 @@ namespace InTouchLibrary
                     }
                     else
                     {
-                        Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток для {numberTouch}");
+                        Notify?.Invoke(LogType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток для {numberTouch}");
                         _netStream.Close();
                         Close();
                         return;
@@ -107,12 +115,12 @@ namespace InTouchLibrary
                 }
                 catch (Exception e)
                 {
-                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                    Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                 }
             }
             else
             {
-                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
             }
         }
 
@@ -135,17 +143,17 @@ namespace InTouchLibrary
                             }
                             catch (Exception e)
                             {
-                                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                                 break;
                             }
                         } while (_netStream.DataAvailable);
                         
-                        Notify?.Invoke(MessageType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {data.ToString()} ");
+                        Notify?.Invoke(LogType.text, $"{DateTime.Now} от {numberTouch} получено сообщение {data.ToString()} ");
                         return data.ToString();
                     }
                     else
                     {
-                        Notify?.Invoke(MessageType.error, $"{DateTime.Now} Вы не можете читать данные из этого потока для {numberTouch}");
+                        Notify?.Invoke(LogType.error, $"{DateTime.Now} Вы не можете читать данные из этого потока для {numberTouch}");
                         _netStream.Close();
                         Close();
                         return string.Empty;
@@ -153,13 +161,13 @@ namespace InTouchLibrary
                 }
                 catch (Exception e)
                 {                    
-                    Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                    Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                     return string.Empty;
                 }
             }
             else
             {
-                Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
                 return string.Empty;
             }
         }
@@ -168,7 +176,7 @@ namespace InTouchLibrary
         {
             if (client != null) client.Close();
             if (_netStream != null) _netStream.Close();
-            Notify?.Invoke(MessageType.warn, $"{DateTime.Now} Соединение с клиентом закрыто");
+            Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение с клиентом закрыто");
         }
     }
 }

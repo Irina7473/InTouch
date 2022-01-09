@@ -8,7 +8,7 @@ namespace ServerInTouch
     {
         static void Main()
         {
-            Output(MessageType.info, $"{DateTime.Now} Server start");
+            Output(LogType.info, $"{DateTime.Now} Server start");
             LogToFile.Notify += Output;
             TcpServer.Notify += Output;
             ClientConnection.Notify += Output;
@@ -44,20 +44,20 @@ namespace ServerInTouch
             return number;
         }
 
-        static void Output(MessageType type,string message)
+        static void Output(LogType type,string message)
         {
             switch (type)
             {
-                case MessageType.info:
+                case LogType.info:
                     Console.ForegroundColor = ConsoleColor.Green;
                     break;
-                case MessageType.warn:
+                case LogType.warn:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
-                case MessageType.error:
+                case LogType.error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
-                case MessageType.text:
+                case LogType.text:
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }

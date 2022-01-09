@@ -2,7 +2,7 @@
 
 namespace DataBaseActions
 {
-    class Contact
+    class DMContact
     {
         public int Id { get; set; }
         public int ChatId { get; set; }  // или имя чата??

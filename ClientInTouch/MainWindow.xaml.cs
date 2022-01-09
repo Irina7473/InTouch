@@ -21,6 +21,7 @@ using System.Windows.Threading;
 using InTouchLibrary;
 using DataBaseActions;
 using Logger;
+using System.IO;
 
 namespace ClientInTouch
 {
@@ -31,17 +32,17 @@ namespace ClientInTouch
     public partial class MainWindow : Window
     {
         Client client;
-        IPAddress ip;
-        int port;
+        //IPAddress ip;
+        //int port;
         string message;
-        public static event Action<MessageType, string> Notify;
+        public static event Action<LogType, string> Notify;
         LogToFile log;        
         public Task taskRead;
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
 
-        User user;
-        ObservableCollection<Chat> chats;
+        //DMUser user;
+        ObservableCollection<DMChat> chats;
         public MainWindow()
         {
             InitializeComponent();
@@ -52,8 +53,7 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
-            user = new ();
-            chats = new ObservableCollection<Chat> {new Chat("chat1"), new Chat("chat2"), new Chat("chat3") };
+            chats = new ObservableCollection<DMChat> {};
             ChatsList.ItemsSource = chats;
         }
 
@@ -62,12 +62,18 @@ namespace ClientInTouch
             EntryWindow entry = new EntryWindow();
             entry.Owner = this;
             entry.client = this.client;
-            entry.user = this.user;
             
             if (entry.ShowDialog() == true)
-            {                
-                Button_Entry.Content = entry.TextBox_Login.Text; //сюда user.login
+            {
+                client.user = client.ReceiveUser();
+                Button_Entry.Content = client.user.Login; //entry.TextBox_Login.Text; 
                 Button_Entry.IsEnabled = false;
+                foreach (var chat in client.user.Chats)
+                {
+                    //if (chat.Avatar == null) chat.Avatar = File.ReadAllBytes(@"/Resources/account_black.png");
+                    //@"pack://application:,,,/Resources/account_black.png"
+                    chats.Add(chat);
+                }
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();
             }
@@ -77,12 +83,14 @@ namespace ClientInTouch
         //Рудимент - удалить в дальнейшем
         private void Button_Settings_Click(object sender, RoutedEventArgs e)
         {
+            /*
             ip= IPAddress.Parse("127.0.0.1");
             port = 8005;
             client.ConnectToServer(ip, port, "login", "password");
             
             taskRead = new(() => { ReceivedAsync(); });
             taskRead.Start();
+            */
         }
 
         private async void ReceivedAsync()
@@ -98,13 +106,13 @@ namespace ClientInTouch
                         using (cancelTokenRead = new CancellationTokenSource())
                         { await AppendFormattedTextAsync("server", message, cancelTokenRead.Token); }
                     }
-                    catch (Exception exc) { Notify?.Invoke(MessageType.error, $"{DateTime.Now} {exc.ToString()}"); }
+                    catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
                     finally { cancelTokenRead = null; }
                 }
             }
             else
             {
-                Notify?.Invoke(MessageType.error, "Соединение с сервером разорвано");
+                Notify?.Invoke(LogType.error, "Соединение с сервером разорвано");
                 MessageBox.Show("Соединение с сервером разорвано");
             }
         }
@@ -120,16 +128,27 @@ namespace ClientInTouch
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var chat = (Chat)((ListBox)sender).SelectedItem;
-            if (chat.Messages != null)
+            var chat = (DMChat)((ListBox)sender).SelectedItem;
+            var messages = chat.ChatMessages();
+            if (messages.Count != 0)
             {
-                foreach (var mes in chat.Messages)
+                
+                foreach (var mes in messages)
                 {
                     //RichTextBox_СhatСontent.AppendText(mes.Content);
                     string type = string.Empty;
-                    if (mes.SenderId == client.UserId) type = "client";
-                    else type = "server";
-                    AppendFormattedText(type, mes.Content);
+                    string message = string.Empty;
+                    if (mes.SenderId == client.user.Id)
+                    {
+                        type = "client";
+                        message = mes.Content;
+                    }
+                    else
+                    {
+                        type = "server";
+                        message = $"{mes.SenderLogin()} : " + mes.Content;
+                    }
+                    AppendFormattedText(type, message);
                 }
             }
             else RichTextBox_СhatСontent.Document.Blocks.Clear();
@@ -148,20 +167,20 @@ namespace ClientInTouch
                         using (cancelTokenSend = new CancellationTokenSource())
                         { await AppendFormattedTextAsync("client", message, cancelTokenSend.Token); }
                     }
-                    catch (Exception exc) { Notify?.Invoke(MessageType.error, exc.Message); }
+                    catch (Exception exc) { Notify?.Invoke(LogType.error, exc.Message); }
                     finally { cancelTokenSend = null;}
                     TextBox_Message.Text = "";
                     client.Send(message);                    
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Соединение с сервером разорвано");
+                    Notify?.Invoke(LogType.error, "Соединение с сервером разорвано");
                     MessageBox.Show("Соединение с сервером разорвано");
                 }
             }
             else
             {
-                Notify?.Invoke(MessageType.error, "Соединение с сервером не установлено");
+                Notify?.Invoke(LogType.error, "Соединение с сервером не установлено");
                 MessageBox.Show("Соединение с сервером не установлено");
             }
         }      
@@ -229,7 +248,7 @@ namespace ClientInTouch
             }
             if (type == "client")
             {
-                rangeOfWord.Text = "\t\t" + text + "\r";
+                rangeOfWord.Text = "\t\t\t\t" + text + "\r";
                 rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.DarkGreen);
             }
                 

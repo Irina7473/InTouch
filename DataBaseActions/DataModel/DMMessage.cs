@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DataBaseActions
 {
-    public class Message
+    public class DMMessage
     {
         public int Id { get; set; }
         public string MessageType { get; set; }
@@ -13,5 +13,10 @@ namespace DataBaseActions
         public string Content { get; set; } //byte[] 
         public bool Status { get; set; }
 
+        public string SenderLogin()
+        {
+            var db = new DBConnection();
+            return db.FindUserName(SenderId);
+        }
     }        
 }

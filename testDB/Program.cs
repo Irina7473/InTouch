@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Text.Json;
 using DataBaseActions;
 using Logger;
 
@@ -27,32 +28,38 @@ namespace testDB
             var users = db.ReceiveListUsers(1);
             foreach (var us in users) Console.Write($"{us}  ");
             Console.WriteLine();*/
-            
-            var t = DateTime.Now;
-            Console.WriteLine(t.ToUniversalTime());
-            db.RecordToMessage($"text|2021-11-10|user 2|чат 1|yra");
+            /*
+            var t = DateTime.Now.ToString();
+            Console.WriteLine(t);
+            //db.RecordToMessage($"text|2021-05-08 10:02:45|user 2|чат 1|yra");
+            db.RecordToMessage($"text|{t}|user 1|чат 1|no");
             Console.WriteLine();
 
             var mes = db.FindMessageToChat("чат 1");
             foreach (var m in mes) Console.Write($"{m}  ");
-            Console.WriteLine();
+            Console.WriteLine();*/
 
+            var users = db.ReceiveListChats(1);
+            foreach (var u in users) Console.Write($"{u}  ");
+            Console.WriteLine();
+            var user = db.FindUser("user 1", "123");
+            Console.WriteLine(JsonSerializer.Serialize<DMUser>(user));
         }   
 
-        static void Output(MessageType type, string message)
+        static void Output(LogType type, string message)
         {
             switch (type)
             {
-                case MessageType.info:
+                case LogType.info:
                     Console.ForegroundColor = ConsoleColor.Green;
                     break;
-                case MessageType.warn:
+                case LogType.warn:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
-                case MessageType.error:
+                case LogType.error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
-                case MessageType.text:
+                case LogType.text:
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }

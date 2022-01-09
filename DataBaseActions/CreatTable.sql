@@ -28,5 +28,5 @@ create table table_messages
     senderId    int             not null,
     chatId      int             not null,
     content     varchar(8000) not null,
-    status      tinyint(1)      null
+    status      tinyint(1)   NOT NULL DEFAULT 0
 );

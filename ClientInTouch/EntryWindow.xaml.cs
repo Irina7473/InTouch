@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using InTouchLibrary;
 using DataBaseActions;
+using System.Text.Json;
 
 namespace ClientInTouch
 {
@@ -30,7 +31,7 @@ namespace ClientInTouch
         string login;
         string password;
         string message;
-        public User user;
+        public DMUser user;
 
         public EntryWindow()
         {
@@ -39,7 +40,6 @@ namespace ClientInTouch
             login = string.Empty;
             password = string.Empty;
             message = string.Empty;
-            user = new();
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
@@ -64,16 +64,14 @@ namespace ClientInTouch
                     password = TextBox_Password.Text.ToString();
                     client.ConnectToServer(ip, port, login, password);
                     message = client.Read();
-                    //добавить разбор сообщения по типу
-                    var ident = message.Split('|');
-                    var check = ident[1];
-                    if (check == "admit")
+                    var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                    if (mesCreat.Type == MessageType.error) MessageBox.Show(mesCreat.Mes);
+                    else if (mesCreat.Type == MessageType.ident)
                     {
-                        client.UserId = Int32.Parse(ident[2]);
-                        MessageBox.Show($"{client.UserId.ToString()} авторизован");
+                        MessageBox.Show($"{mesCreat.Mes}");
                         this.DialogResult = true;
                     }
-                    else MessageBox.Show("Неверный логин или пароль");
+                    else MessageBox.Show("Ошибка авторизации");
                 }
             }
         }

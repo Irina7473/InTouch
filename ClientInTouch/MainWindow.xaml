@@ -25,7 +25,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Menu x:Name="Menu" Width="30" Margin="10">
                         <Menu.Background>
-                            <ImageBrush ImageSource= "pack://application:,,,/Resources\settings.png" />
+                            <ImageBrush ImageSource= "Resources/settings.png" />
                         </Menu.Background>
                         <MenuItem Width="30" Height="30">
                             <Button Name="Button_Settings" Content="Подключение"
@@ -62,8 +62,8 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Image x:Name="Image_Avatar" Source="{Binding Avatar}"
-                                   Width="40" />
-                                <TextBlock x:Name="TextBlock_ChatName" Text="{Binding Name}"
+                                   Width="40" /> 
+                                <TextBlock x:Name="TextBlock_ChatName" Text="{Binding ChatName}"
                                        Style="{DynamicResource style_TextBlockChat}" />
                             </StackPanel>
                         </DataTemplate>

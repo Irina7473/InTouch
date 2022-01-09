@@ -10,7 +10,7 @@ namespace InTouchLibrary
 {
     public class TcpServer
     {
-        public static event Action<MessageType, string> Notify;
+        public static event Action<LogType, string> Notify;
         private int _port;
         private TcpListener _listener;
         private int _amtTouch;  //макс кол-во активных соединений
@@ -29,11 +29,11 @@ namespace InTouchLibrary
             {
                 _listener = new TcpListener(IPAddress.Any, _port);
                 _listener.Start(_amtTouch);
-                Notify?.Invoke(MessageType.info, $"{DateTime.Now} Listen");
+                Notify?.Invoke(LogType.info, $"{DateTime.Now} Listen");
             }
             catch (Exception e)
             {                
-                Notify?.Invoke(MessageType.error, $"{DateTime.Now} {e}");
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
             }
 
             while (true)
@@ -43,7 +43,7 @@ namespace InTouchLibrary
                     var connection = _listener.AcceptTcpClient();
                     var client=new ClientConnection();
                     numberTouch++;
-                    Notify?.Invoke(MessageType.info, $"{DateTime.Now} Accept {numberTouch}");
+                    Notify?.Invoke(LogType.info, $"{DateTime.Now} Accept {numberTouch}");
                     Task task = new(() =>
                     {                        
                         client.ConnectToClient(connection, numberTouch);
