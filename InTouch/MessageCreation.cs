@@ -47,10 +47,10 @@ namespace InTouchLibrary
 
     public class MessageSendContent : MessageCreation
     {
-        public DMUser User { get; set; }
-        public MessageSendContent(MessageType type, DMUser user) : base(type)
+        public DMMessage Message { get; set; }
+        public MessageSendContent(MessageType type, DMMessage message) : base(type)
         {
-            User = user;
+            Message = message;
         }
     }
 
@@ -64,20 +64,3 @@ namespace InTouchLibrary
         content
     }
 }
-/*
-    public interface IMessageCreation
-    {
-        public void IdentifyMessage(){}
-    }*/
-/*
-        public void IdentifyMessage() 
-        {
-            switch (Type)
-            {
-                case MessageType.ident:
-                    var user = JsonSerializer.Deserialize<DMUser>(Mes);
-                    break;
-                
-            }
-
-        }*/

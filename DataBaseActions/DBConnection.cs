@@ -13,10 +13,8 @@ namespace DataBaseActions
     {
         public static event Action<LogType, string> Notify;
         string connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;convert zero datetime=True;";
-
         private MySqlConnection _connection;
         private MySqlCommand _query;
-
         public DBConnection()
         {
             _connection = new MySqlConnection(connectionString);
@@ -45,113 +43,114 @@ namespace DataBaseActions
                 Notify?.Invoke(LogType.error, "Путь к базе данных не найден");
             }
         }
-                
         public void Close()
         {
             _connection.Close();
         }
 
-        public void RecordToUser(string message)
-        {            
-            var user = message.Split('|');
-            var login= user[0];
-            var password = user[1];
-            var avatar = user[2];
+        // Запись в БД
+        public void RecordToUser(DMUser User)
+        {
+            var loginParam = new MySqlParameter("@login", User.Login);
+            _query.Parameters.Add(loginParam);
+            var passwordParam = new MySqlParameter("@password", User.Password);
+            _query.Parameters.Add(passwordParam);
+            var avatarParam = new MySqlParameter("@avatar", User.Avatar);
+            _query.Parameters.Add(avatarParam);
 
             Open();
             _query.CommandText = $"INSERT INTO table_users (login, password, avatar)" +
-                    $"VALUES ('{login}', '{password}', '{avatar}')";
+                    $"VALUES (@login, @password, @avatar)";
             try { _query.ExecuteNonQuery(); }
             catch { Notify?.Invoke(LogType.warn, "Пользователь с таким именем существует"); }
             Close();
         }
-
-        public void RecordToChat(string message)
+        public void RecordToChat(DMChat chat)
         {
-            var chat = message.Split('|');
-            var chatName = chat[0];
-            var avatar = chat[1];  //как его сделать bool?
-           Open();
+            var nameParam = new MySqlParameter("@name", chat.ChatName);
+            _query.Parameters.Add(nameParam);
+            var avatarParam = new MySqlParameter("@avatar", chat.Avatar);
+            _query.Parameters.Add(avatarParam);
+            Open();
             _query.CommandText = $"INSERT INTO table_chats (chatName, avatar)" +
-                    $"VALUES ('{chatName}', '{avatar}')";
+                    $"VALUES (@name, @avatar)";
             try { _query.ExecuteNonQuery(); }
             catch { Notify?.Invoke(LogType.warn, "Чат с таким именем существует"); }
             Close();
         }
-
-        public void RecordToContact(string message)
+        public void RecordToContact(DMContact contact)
         {
-            var contact = message.Split('|');
-            var chat = contact[0];
-            var chatId = FindChatId(chat);
-            var user = contact[1];
-            var userId = FindUserId(user);
-            if (chatId != -1)
+            if (!FindChat(contact.ChatId))
             {
-                if (userId != -1)
+                Notify?.Invoke(LogType.error, "Не найден чат");
+                return;
+            }
+            else 
+            {
+                if (FindUser(contact.UserId))
                 {
+                    Notify?.Invoke(LogType.error, "Не найден пользователь");
+                    return;
+                }
+                else
+                {
+                    var userIdParam = new MySqlParameter("@userId", contact.UserId);
+                    _query.Parameters.Add(userIdParam);
+                    var chatIdParam = new MySqlParameter("@chatId", contact.ChatId);
+                    _query.Parameters.Add(chatIdParam);
                     Open();
-                    _query.CommandText = $"SELECT chatId, userId FROM table_contacts WHERE chatId='{chatId}' AND userId='{userId}';";
+                    _query.CommandText = $"SELECT chatId, userId FROM table_contacts WHERE chatId='{contact.ChatId}' AND userId='{contact.UserId}';";
                     var result = _query.ExecuteReader();
-                    if (result.HasRows) Notify?.Invoke(LogType.warn, $"В чате {chatId} есть контакт {userId}");
+                    if (result.HasRows) Notify?.Invoke(LogType.warn, $"В чате {contact.ChatId} есть контакт {contact.UserId}");
                     else
                     {
                         result.Close();
-                        _query.CommandText = $"INSERT INTO table_contacts (chatId, userId)" +
-                            $"VALUES ({chatId}, {userId})";
+                        _query.CommandText = "INSERT INTO table_contacts (chatId, userId) VALUES (@userId, @chatId)";
                         try { _query.ExecuteNonQuery(); }
-                        catch { Notify?.Invoke(LogType.error, $"Не удалось добавить пользователя {userId} в чат {chatId}"); }
+                        catch { Notify?.Invoke(LogType.error, $"Не удалось добавить пользователя {contact.UserId} в чат {contact.ChatId}"); }
                     }
                     Close();
                 }
-                else Notify?.Invoke(LogType.error, "Не найден пользователь");
-
             }
-            else Notify?.Invoke(LogType.error, "Не найден чат");
         }
-
-        public void RecordToMessage(string message)
+        public void RecordToMessage(DMMessage message)
         {
-            var mess = message.Split('|');
-            var messageType = mess[0];
-            var time = (mess[1]);
-            var sender = mess[2];
-            var senderId = FindUserId(sender);
-            var chat = mess[3];
-            var chatId = FindChatId(chat);
-            var content = mess[4];
-            //var content = Encoding.Unicode.GetBytes(mess[4]);
-
-            Open();
-            _query.CommandText = $"INSERT INTO table_messages (messageType, time, senderId, chatId, content)" +
-                    $"VALUES ('{messageType}', STR_TO_DATE('{time}', '%m/%d/%Y %h:%i:%s %p'), {senderId}, {chatId}, '{content}')";
-            try { _query.ExecuteNonQuery(); }
-            catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString()); }
-            Close();
-        }
-
-
-        //Запросы к БД
-        public int FindUserId (string nameUser)
-        {
-            Open();
-            _query.CommandText = $"SELECT id FROM table_users where login='{nameUser}';";
-            var result = _query.ExecuteReader();
-            if (!result.HasRows)
+            if (!FindChat(message.ChatId))
             {
-                Notify?.Invoke(LogType.warn, "Нет данных в таблице пользователей");
-                Close();
-                return -1;
+                Notify?.Invoke(LogType.error, "Не найден чат");
+                return;
             }
             else
             {
-                result.Read();
-                int idUser = result.GetInt32(0);
-                Close();
-                return idUser;
+                if (FindUser(message.SenderId))
+                {
+                    Notify?.Invoke(LogType.error, "Не найден пользователь");
+                    return;
+                }
+                else
+                {
+                    var typeParam = new MySqlParameter("@type", message.MessageType);
+                    _query.Parameters.Add(typeParam);
+                    var timeParam = new MySqlParameter("@time", message.DateTime);
+                    _query.Parameters.Add(timeParam);
+                    var senderIdParam = new MySqlParameter("@senderId", message.SenderId);
+                    _query.Parameters.Add(senderIdParam);
+                    var chatIdParam = new MySqlParameter("@chatId", message.ChatId);
+                    _query.Parameters.Add(chatIdParam);
+                    var contentParam = new MySqlParameter("@content", message.Content);
+                    _query.Parameters.Add(contentParam);
+
+                    Open();            
+                    _query.CommandText = "INSERT INTO table_messages (messageType, time, senderId, chatId, content)" +
+                    "VALUES (@type, @time, @senderId, @chatId, @content)";
+                    try { _query.ExecuteNonQuery(); }
+                    catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString()); }
+                    Close();
+                }
             }
         }
 
+        //Запросы к БД
         public DMUser FindUser(string login, string password)
         {
             Open();
@@ -178,6 +177,42 @@ namespace DataBaseActions
                 return user;
             }
         }
+        public bool FindUser(int idUser)
+        {
+            Open();
+            _query.CommandText = $"SELECT *FROM table_users where id='{idUser}';";
+            var result = _query.ExecuteReader();
+            if (!result.HasRows)
+            {
+                Notify?.Invoke(LogType.warn, $"Нет данных в таблице пользователей о {idUser}");
+                Close();
+                return false;
+            }
+            else
+            {
+                Close();
+                return true;
+            }
+        }
+        public int FindUserId (string nameUser)
+        {
+            Open();
+            _query.CommandText = $"SELECT id FROM table_users where login='{nameUser}';";
+            var result = _query.ExecuteReader();
+            if (!result.HasRows)
+            {
+                Notify?.Invoke(LogType.warn, "Нет данных в таблице пользователей");
+                Close();
+                return -1;
+            }
+            else
+            {
+                result.Read();
+                int idUser = result.GetInt32(0);
+                Close();
+                return idUser;
+            }
+        }
         public string FindUserName(int idUser)
         {          
             Open();
@@ -199,6 +234,23 @@ namespace DataBaseActions
             }
         }
 
+        public bool FindChat(int idChat)
+        {
+            Open();
+            _query.CommandText = $"SELECT *FROM table_chats where id='{idChat}';";
+            var result = _query.ExecuteReader();
+            if (!result.HasRows)
+            {
+                Notify?.Invoke(LogType.warn, $"Нет данных в таблице чатов о {idChat}");
+                Close();
+                return false;
+            }
+            else
+            {
+                Close();
+                return true;
+            }
+        }
         public int FindChatId(string nameChat)
         {
             Open();
@@ -218,10 +270,8 @@ namespace DataBaseActions
                 return idChat;
             }
         }
-
         public string FindChatName(int idChat)
         {
-            //if (_connection.State.ToString()!="Open") 
             Open();
             _query.CommandText = $"SELECT chatName FROM table_chats where id='{idChat}';";
             var result = _query.ExecuteReader();
@@ -240,7 +290,6 @@ namespace DataBaseActions
                 return nameChat;
             }
         }
-
         
         public List<string> ReceiveListUsers(int idChat)
         {
@@ -293,12 +342,11 @@ namespace DataBaseActions
             }
         }
 
-
         public List<DMMessage> FindMessageToChat(int idChat)
         {
             var messages = new List<DMMessage>();
             Open();
-            _query.CommandText = $"SELECT * FROM table_messages WHERE chatId='{idChat}';";    // AS m INNER JOIN table_chats AS c ON m.chatId = c.id WHERE chatName='{nameChat}';";
+            _query.CommandText = $"SELECT * FROM table_messages WHERE chatId='{idChat}';";
             var result = _query.ExecuteReader();
             if (!result.HasRows)
             {
@@ -308,7 +356,6 @@ namespace DataBaseActions
             }
             else
             {
-                //var messages = new List<DMMessage>();
                 while (result.Read())
                 {
                     var mes= new DMMessage();

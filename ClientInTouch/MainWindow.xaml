@@ -108,7 +108,7 @@
                     <Button 
                             Style="{DynamicResource style_Button}" />
                     <TextBox x:Name="TextBox_Message" Text="Написать сообщение"
-                             Width="500" Margin="5" Background="AliceBlue" Foreground="Gray"
+                             Width="400" Margin="5" Background="AliceBlue" Foreground="Gray"
                              GotFocus="TextBox_Message_GotFocus" LostFocus="TextBox_Message_LostFocus"/>
                     <Button Name="Button_Send" Content="->"
                             Click="Button_Send_Click"

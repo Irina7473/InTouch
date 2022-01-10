@@ -1,6 +1,7 @@
 ﻿using System;
 using InTouchLibrary;
 using Logger;
+using DataBaseActions;
 
 namespace ServerInTouch
 {
@@ -11,6 +12,7 @@ namespace ServerInTouch
             Output(LogType.info, $"{DateTime.Now} Server start");
             LogToFile.Notify += Output;
             TcpServer.Notify += Output;
+            DBConnection.Notify += Output;
             ClientConnection.Notify += Output;
             var log = new LogToFile();
             TcpServer.Notify += log.RecordToLog;

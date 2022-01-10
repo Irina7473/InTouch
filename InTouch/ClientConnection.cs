@@ -71,26 +71,29 @@ namespace InTouchLibrary
             Notify?.Invoke(LogType.info, message);
             Send(message);
 
-            // Если есть в чатах сообщения, то передать
-            
-            /*
+            /*  Проверка новых сообщений НУЖНА
             Task taskSend = new(() => { 
                 Send("Hello");                
                 Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
             });
-            //taskSend.Start();*/
+            taskSend.Start();*/
 
             // Запуск чтения 
             Task taskRead = new(() => {
                 while (client.Connected)
                 {
-                    Read();
+                    var message = Read();
                     //Добавить запись в базу данных
-                    // Добавить чтение из базы данных
-                    Send("Доставлено");
+                    var mesCreat = JsonSerializer.Deserialize<MessageSendContent>(message);
+                    if (mesCreat.Type == MessageType.content)
+                    {
+                        var db = new DBConnection();
+                        db.RecordToMessage(mesCreat.Message);
+                    }
+                    
+
                 } });
             taskRead.Start();
-            //taskSend.Start();
         }        
 
         public void Send(string message)

@@ -22,6 +22,7 @@ using InTouchLibrary;
 using DataBaseActions;
 using Logger;
 using System.IO;
+using System.Text.Json;
 
 namespace ClientInTouch
 {
@@ -127,6 +128,8 @@ namespace ClientInTouch
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+            // сообщения пока добавляются только при смене чата и добавляются все, вместе со старыми
+            // изменить функцию Append 
         {
             var chat = (DMChat)((ListBox)sender).SelectedItem;
             var messages = chat.ChatMessages();
@@ -160,16 +163,22 @@ namespace ClientInTouch
             {
                 if (client.client.Connected)
                 {
-                    message = TextBox_Message.Text;
+                    var mes = new DMMessage();
+                    mes.MessageType = "text";
+                    mes.DateTime = DateTime.Now;
+                    mes.SenderId = client.user.Id;
+                    mes.ChatId = ((DMChat)((ChatsList).SelectedItem)).Id; 
+                    mes.Content = TextBox_Message.Text;
                     if (cancelTokenSend != null) return;
                     try
                     {
                         using (cancelTokenSend = new CancellationTokenSource())
-                        { await AppendFormattedTextAsync("client", message, cancelTokenSend.Token); }
+                        { await AppendFormattedTextAsync("client", mes.Content, cancelTokenSend.Token); }
                     }
                     catch (Exception exc) { Notify?.Invoke(LogType.error, exc.Message); }
                     finally { cancelTokenSend = null;}
                     TextBox_Message.Text = "";
+                    message = JsonSerializer.Serialize<MessageSendContent>(new MessageSendContent(MessageType.content, mes));
                     client.Send(message);                    
                 }
                 else
