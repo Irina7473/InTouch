@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInTouch"
         mc:Ignorable="d"
-        Title="InTouch" Height="600" Width="900" >
+        Title="InTouch" Height="600" Width="900" Background="LightSeaGreen">
     <Window.Resources>
         <ResourceDictionary Source="Style.xaml" />
     </Window.Resources>
-    <Grid>
+    <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
@@ -23,32 +23,58 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    <Button Name="Button_Settings" Content="..."
-                            Click="Button_Settings_Click"
-                            Style="{DynamicResource style_Button}" />
-                    <TextBox x:Name="TextBox_SearchContact" Width="110" Margin="5"
+                    <Menu x:Name="Menu" Width="30" Margin="10">
+                        <Menu.Background>
+                            <ImageBrush ImageSource= "Resources/settings.png" />
+                        </Menu.Background>
+                        <MenuItem Width="30" Height="30">
+                            <Button Name="Button_Settings" Content="Подключение"
+                                    Click="Button_Settings_Click" 
+                                    Style="{DynamicResource style_ButtonMenu}"/>
+                            <Separator />
+                            <MenuItem >
+                            
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Администрирование">
+                                <Button Name="Button_AccountSettings" Content="Настройка аккаунтов"
+                                        Click="Button_AccountSettings_Click" 
+                                        Style="{DynamicResource style_ButtonMenu}"/>
+                            
+                        </MenuItem>
+                            <MenuItem Header="О программе" />
+                            <MenuItem Header="Справка" />
+                            
+                        </MenuItem>
+                    </Menu>
+                    
+                    <TextBox x:Name="TextBox_SearchContact" Text="Поиск"
+                             Width="110" Margin="5" Background="PaleTurquoise" Foreground="Gray"
                              GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>
                     <Button Name="Button_AddChat" Content="+"
                             Click="Button_AddChat_Click"
                             Style="{DynamicResource style_Button}" />
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="1">
-                <ListView Name="ContactsList">
-                <ListView.View >
-                    <GridView >
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="150"></GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path}" Width="30"></GridViewColumn>
-                    </GridView>
-                </ListView.View>
-                <ListView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
-                        <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
-                    </ContextMenu>
-                </ListView.ContextMenu>
-                </ListView>
+            <Grid Grid.Row="1" >
+                <ListBox Name="ChatsList" Background="AliceBlue" SelectionChanged="ChatsList_SelectionChanged">                    
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="Image_Avatar" Source="{Binding Avatar}"
+                                   Width="40" /> 
+                                <TextBlock x:Name="TextBlock_ChatName" Text="{Binding ChatName}"
+                                       Style="{DynamicResource style_TextBlockChat}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
+                            <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </ListBox>
             </Grid>
         </Grid>
         
@@ -64,20 +90,25 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    
+                    <Button Name="Button_Entry" Content="ВХОД"
+                            Click="Button_Entry_Click"
+                            Width="100"  Style="{DynamicResource style_Button}" />
                 </StackPanel>
-            </Grid>
+            </Grid>            
             <Grid Grid.Row="1">
-                <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                                 Margin="10" />                
+                <ScrollViewer>
+                    <RichTextBox x:Name="RichTextBox_СhatСontent" 
+                              Background="AliceBlue" />
+                </ScrollViewer>
             </Grid>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="3">
                 <StackPanel Orientation="Horizontal">
                     <Button 
                             Style="{DynamicResource style_Button}" />
                     <Button 
                             Style="{DynamicResource style_Button}" />
-                    <TextBox x:Name="TextBox_Message" Width="500" Margin="5"
+                    <TextBox x:Name="TextBox_Message" Text="Написать сообщение"
+                             Width="400" Margin="5" Background="AliceBlue" Foreground="Gray"
                              GotFocus="TextBox_Message_GotFocus" LostFocus="TextBox_Message_LostFocus"/>
                     <Button Name="Button_Send" Content="->"
                             Click="Button_Send_Click"

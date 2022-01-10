@@ -4,15 +4,21 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using Logger;
+using DataBaseActions;
+using System.Text.Json;
 
-namespace InTouchServer
+namespace InTouchLibrary
 {
     public class Client
     {
-        public static event Action<MessageType, string> Notify;
+        public static event Action<LogType, string> Notify;
         public TcpClient client;
-        private string _macAddress;
         private NetworkStream _netStream;
+        public DMUser user;
+
+        public bool Connected { get; set; }
 
         public void ConnectToServer(IPAddress ip, int port, string login, string password)
         {
@@ -20,44 +26,40 @@ namespace InTouchServer
             {
                 client = new();
                 client.Connect(ip, port);
-                _macAddress = GetMacAddress();
                 _netStream = client.GetStream();
-                Notify?.Invoke(MessageType.info, "Соединение с сервером установлено");
-                Send($"Подключено устройство {_macAddress} {login} {password}");
+                Notify?.Invoke(LogType.info, $"{DateTime.Now} Соединение с сервером установлено");
+                string message = JsonSerializer.Serialize<MessageIdent>(new MessageIdent(MessageType.ident, login, password));
+                Send(message);
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
             }            
-        }
-
-        private string GetMacAddress()
+        }        
+        
+        public DMUser ReceiveUser()
         {
-            string macAddress = "";
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (nic.OperationalStatus == OperationalStatus.Up)
-                {
-                    macAddress += nic.GetPhysicalAddress().ToString();
-                    break;
-                }
-            }
-            return macAddress;
+            var message = Read();
+            var mesCreat = JsonSerializer.Deserialize<MessageSendUser>(message);
+            if (mesCreat.Type == MessageType.user) user= mesCreat.User;
+            return user;
         }
 
         public void Send(string message)
         {
-            try
+            if (client.Connected)
+            {
+                try
             {
                 if (_netStream.CanWrite)
                 {
                     Byte[] sendBytes = Encoding.Unicode.GetBytes(message);
                     _netStream.Write(sendBytes, 0, sendBytes.Length);
-                    Notify?.Invoke(MessageType.text, $"Передано сообщение {message}");
+                    Notify?.Invoke(LogType.text, $"{DateTime.Now} Передано сообщение {message}");
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете записывать данные в этот поток.");
+                    Notify?.Invoke(LogType.error, $"{DateTime.Now} Вы не можете записывать данные в этот поток.");
                     Close();
                     _netStream.Close();
                     return;
@@ -65,56 +67,68 @@ namespace InTouchServer
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
             }
         }
-
+            else
+            {
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение разорвано");
+            }
+}
+        
         public string Read()
         {
-            try
+            if (client.Connected)
+            {
+                try
             {
                 if (_netStream.CanRead)
                 {
-                    var buffer = new byte [client.ReceiveBufferSize];
-                    var data = new List<byte>();
+                    var buffer = new byte [256];
+                    var data = new StringBuilder();
                     do
                     {
                         try
                         {
-                            _netStream.Read(buffer, 0, (int)client.ReceiveBufferSize);
-                            data.AddRange(buffer);
+                            int bytes=_netStream.Read(buffer, 0, buffer.Length);
+                            data.Append(Encoding.Unicode.GetString( buffer, 0 , bytes));
                         }
-                        catch (Exception exc)
+                        catch (Exception e)
                         {
-                            Notify?.Invoke(MessageType.error, exc.Message);
+                            Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
                             break;
                         }
                     } while (_netStream.DataAvailable);
-                    var t = data.ToArray();
-                    var message = Encoding.Unicode.GetString(t, 0, t.Length);                    
-                    Notify?.Invoke(MessageType.text, $"Получено сообщение {message}");
-                    return message;
+                                        
+                    Notify?.Invoke(LogType.text, $"{DateTime.Now} Получено сообщение {data.ToString()}");
+                    return data.ToString();
                 }
                 else
                 {
-                    Notify?.Invoke(MessageType.error, "Вы не можете читать данные из этого потока.");
+                    Notify?.Invoke(LogType.error, "Вы не можете читать данные из этого потока.");
                     Close();
                     _netStream.Close();
-                    return "Вы не можете читать данные из этого потока.";
+                    return string.Empty;
                 }               
             }
             catch (Exception e)
             {
-                Notify?.Invoke(MessageType.error, e.ToString());
-                return e.ToString();
-            }            
+                Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
+                return string.Empty;
+            }
+            }
+            else
+            {
+                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение разорвано");
+                return string.Empty;
+            }
         }
 
-        private void Close()
-        {
-            client.Close();
-            Notify?.Invoke(MessageType.warn, "Соединение с сервером закрыто");
+        public void Close()
+        {            
+            if (client !=null) client.Close();
+            if (_netStream !=null) _netStream.Close();
+            Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
         }
-
     }
 }

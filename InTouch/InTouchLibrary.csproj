@@ -1,9 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logger\**" />
+    <EmbeddedResource Remove="Logger\**" />
+    <None Remove="Logger\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DBConnection.cs" />
+    <Compile Remove="IServiceChat.cs" />
+    <Compile Remove="Message.cs" />
+    <Compile Remove="User.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.0.27" />
@@ -11,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataBaseActions\DataBaseActions.csproj" />
-    <ProjectReference Include="..\InTouch\InTouchLibrary.csproj" />
     <ProjectReference Include="..\Logger\Logger.csproj" />
   </ItemGroup>
 

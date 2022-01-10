@@ -7,14 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\account_black.jpg" />
+    <None Remove="Resources\settings.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Remove="Style.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InTouch\InTouchServer.csproj" />
+    <ProjectReference Include="..\DataBaseActions\DataBaseActions.csproj" />
+    <ProjectReference Include="..\InTouch\InTouchLibrary.csproj" />
+    <ProjectReference Include="..\Logger\Logger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\account_black.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\settings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Style.xaml">
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
