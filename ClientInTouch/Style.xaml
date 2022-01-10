@@ -108,8 +108,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
-    
     
     <Style x:Key="style_TextBoxEntry" TargetType="TextBox">
         <Style.Setters>
@@ -121,12 +119,44 @@
         </Style.Setters>
     </Style>
 
+    <Style x:Key="style_ButtonAddChat" TargetType="Button">
+        <Style.Setters>
+            <Setter Property="Background" Value="AliceBlue" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="FontSize" Value="20" />
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="FontWeight" Value="Bold" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="style_TextBoxAddChat" TargetType="TextBox">
+        <Style.Setters>
+            <Setter Property="Background" Value="AliceBlue" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="FontSize" Value="20" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="style_LabelAddChat" TargetType="Label">
+        <Style.Setters>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="5" />
+        </Style.Setters>
+    </Style>
+
     <Style x:Key="style_TextBlockChat" TargetType="TextBlock">
         <Style.Setters>
+            <Setter Property="Background" Value="AliceBlue" />
+            <Setter Property="Height" Value="40" />
             <Setter Property="FontSize" Value="20" />
-            <Setter Property="Foreground" Value="DarkCyan" />
-            <Setter Property="Width" Value="200" />
-            <Setter Property="Margin" Value="5" />
         </Style.Setters>
     </Style>
 

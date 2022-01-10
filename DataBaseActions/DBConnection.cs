@@ -122,7 +122,7 @@ namespace DataBaseActions
             }
             else
             {
-                if (FindUser(message.SenderId))
+                if (!FindUser(message.SenderId))
                 {
                     Notify?.Invoke(LogType.error, "Не найден пользователь");
                     return;

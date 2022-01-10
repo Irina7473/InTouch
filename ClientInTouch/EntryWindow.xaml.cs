@@ -31,7 +31,6 @@ namespace ClientInTouch
         string login;
         string password;
         string message;
-        public DMUser user;
 
         public EntryWindow()
         {

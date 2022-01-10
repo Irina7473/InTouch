@@ -1,0 +1,55 @@
+﻿<Window x:Class="ClientInTouch.AddChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClientInTouch"
+        mc:Ignorable="d"
+        Title="AddChat In Touch" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
+        Height="450" Width="300" Background="LightSeaGreen">
+    <Window.Resources>
+        <ResourceDictionary Source="Style.xaml" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="Button_Back" Content="x"
+                                    Click="Button_Back_Click" 
+                                    Style="{DynamicResource style_Button}"/>
+                <Label Content="Новый чат" Style="{DynamicResource style_LabelAddChat}" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Background="AliceBlue">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="Resources/lupa2.png" Width="40"  Margin="10"/>
+                    <TextBox x:Name="TextBox_SearchContacts" Text="Поиск контактов"
+                                    SelectionChanged="TextBox_SearchContacts_SelectionChanged"
+                                    Style="{DynamicResource style_TextBoxAddChat}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="Resources/plus_green.png" Width="40"  Margin="10"/>
+                    <Button x:Name="Button_CreateChat" Content="Новая группа"
+                                    Click="Button_CreateChat_Click" 
+                                    Style="{DynamicResource style_ButtonAddChat}"/>
+                </StackPanel>
+                <ListBox Name="UsersList" Background="AliceBlue" SelectionChanged="ContactsList_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="Image_Avatar" Source="{Binding Avatar}"
+                                   Width="40" />
+                                <TextBlock x:Name="TextBlock_ChatName" Text="{Binding Login}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+</Window>

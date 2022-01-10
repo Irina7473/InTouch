@@ -18,11 +18,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.IO;
+using System.Text.Json;
 using InTouchLibrary;
 using DataBaseActions;
 using Logger;
-using System.IO;
-using System.Text.Json;
 
 namespace ClientInTouch
 {
@@ -32,7 +32,7 @@ namespace ClientInTouch
     /// 
     public partial class MainWindow : Window
     {
-        Client client;
+        public Client client;
         //IPAddress ip;
         //int port;
         string message;
@@ -42,8 +42,9 @@ namespace ClientInTouch
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
 
-        //DMUser user;
+        ObservableCollection<DMUser> users;
         ObservableCollection<DMChat> chats;
+        ObservableCollection<DMMessage> dialog;
         public MainWindow()
         {
             InitializeComponent();
@@ -54,13 +55,14 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
-            chats = new ObservableCollection<DMChat> {};
+            chats = new ObservableCollection<DMChat> { };
+            dialog = new ObservableCollection<DMMessage> { };
             ChatsList.ItemsSource = chats;
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
         {
-            EntryWindow entry = new EntryWindow();
+            EntryWindow entry = new ();
             entry.Owner = this;
             entry.client = this.client;
             
@@ -71,8 +73,6 @@ namespace ClientInTouch
                 Button_Entry.IsEnabled = false;
                 foreach (var chat in client.user.Chats)
                 {
-                    //if (chat.Avatar == null) chat.Avatar = File.ReadAllBytes(@"/Resources/account_black.png");
-                    //@"pack://application:,,,/Resources/account_black.png"
                     chats.Add(chat);
                 }
                 taskRead = new(() => { ReceivedAsync(); });
@@ -125,12 +125,16 @@ namespace ClientInTouch
             //если чат - выбор аватар, для 1 взять аватар собеседника, по умолчанию аватар из ресурсов
             //запрос в БД списка user, выбор нужных
             // создание Chat(string name, byte[] avatar, List<User> users) 
+            AddChatWindow addchat = new ();
+            addchat.Owner = this;
+            addchat.client = this.client;
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-            // сообщения пока добавляются только при смене чата и добавляются все, вместе со старыми
-            // изменить функцию Append 
-        {
+            // сообщения пока добавляются только при смене чата 
+        {//вариант 1
+            
+            RichTextBox_СhatСontent.Document.Blocks.Clear();
             var chat = (DMChat)((ListBox)sender).SelectedItem;
             var messages = chat.ChatMessages();
             if (messages.Count != 0)
@@ -155,6 +159,37 @@ namespace ClientInTouch
                 }
             }
             else RichTextBox_СhatСontent.Document.Blocks.Clear();
+            
+            /*
+            //вариант2
+            RichTextBox_СhatСontent.Document.Blocks.Clear();
+            var chat = (DMChat)((ListBox)sender).SelectedItem;
+            var messages = chat.ChatMessages();
+            if (messages.Count != 0)
+            {
+                foreach (var mes in messages)
+                    dialog.Add(mes);
+                foreach (var mes in dialog)
+                {
+                    //RichTextBox_СhatСontent.AppendText(mes.Content);
+                    string type = string.Empty;
+                    string message = string.Empty;
+                    if (mes.SenderId == client.user.Id)
+                    {
+                        type = "client";
+                        message = mes.Content;
+                    }
+                    else
+                    {
+                        type = "server";
+                        message = $"{mes.SenderLogin()} : " + mes.Content;
+                    }
+                    AppendFormattedText(type, message);
+                }
+            }
+            else RichTextBox_СhatСontent.Document.Blocks.Clear();
+            */
+
         }
 
         private async void Button_Send_Click(object sender, RoutedEventArgs e)
@@ -276,12 +311,12 @@ namespace ClientInTouch
                 }
                 if (type == "client")
                 {
-                    rangeOfWord.Text = "\t\t" + text + "\r";
+                    rangeOfWord.Text = "\t\t\t\t" + text + "\r";
                     rangeOfWord.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Green);
                 }
                 await Task.Delay(10, token);
             }, DispatcherPriority.Normal, token);
         }
-
+                
     }
 }

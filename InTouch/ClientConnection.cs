@@ -84,13 +84,15 @@ namespace InTouchLibrary
                 {
                     var message = Read();
                     //Добавить запись в базу данных
-                    var mesCreat = JsonSerializer.Deserialize<MessageSendContent>(message);
-                    if (mesCreat.Type == MessageType.content)
-                    {
-                        var db = new DBConnection();
-                        db.RecordToMessage(mesCreat.Message);
+                    try 
+                    { var mesCreat = JsonSerializer.Deserialize<MessageSendContent>(message);
+                        if (mesCreat.Type == MessageType.content)
+                        {
+                            var db = new DBConnection();
+                            db.RecordToMessage(mesCreat.Message);
+                        }
                     }
-                    
+                    catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
 
                 } });
             taskRead.Start();
