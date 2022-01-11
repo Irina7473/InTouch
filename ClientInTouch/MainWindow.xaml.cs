@@ -55,6 +55,8 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
+
+            users = new ObservableCollection<DMUser> { };
             chats = new ObservableCollection<DMChat> { };
             dialog = new ObservableCollection<DMMessage> { };
             ChatsList.ItemsSource = chats;
@@ -68,13 +70,13 @@ namespace ClientInTouch
             
             if (entry.ShowDialog() == true)
             {
-                client.user = client.ReceiveUser();
-                Button_Entry.Content = client.user.Login; //entry.TextBox_Login.Text; 
+                client.user = client.ReceiveUser(); // получаю user 
+                Button_Entry.Content = client.user.Login;  
                 Button_Entry.IsEnabled = false;
-                foreach (var chat in client.user.Chats)
-                {
-                    chats.Add(chat);
-                }
+                // получаю чаты user и добавляю в список чатов
+                foreach (var chat in client.user.Chats) chats.Add(chat);
+                message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.recd, string.Empty));
+                client.Send(message);
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();
             }
@@ -131,15 +133,16 @@ namespace ClientInTouch
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-            // сообщения пока добавляются только при смене чата 
         {//вариант 1
             
             RichTextBox_СhatСontent.Document.Blocks.Clear();
             var chat = (DMChat)((ListBox)sender).SelectedItem;
-            var messages = chat.ChatMessages();
-            if (messages.Count != 0)
+            //var messages = chat.ChatMessages(); // сообщения пока добавляются только при смене чата, надо их получить с сервера
+            //if (messages.Count != 0)
+            // получение сообщений конкретного чата user, нет новых
+            var messages = chat.Messages;  
+            if (messages!=null && messages.Count != 0)
             {
-                
                 foreach (var mes in messages)
                 {
                     //RichTextBox_СhatСontent.AppendText(mes.Content);
@@ -162,32 +165,7 @@ namespace ClientInTouch
             
             /*
             //вариант2
-            RichTextBox_СhatСontent.Document.Blocks.Clear();
-            var chat = (DMChat)((ListBox)sender).SelectedItem;
-            var messages = chat.ChatMessages();
-            if (messages.Count != 0)
-            {
-                foreach (var mes in messages)
-                    dialog.Add(mes);
-                foreach (var mes in dialog)
-                {
-                    //RichTextBox_СhatСontent.AppendText(mes.Content);
-                    string type = string.Empty;
-                    string message = string.Empty;
-                    if (mes.SenderId == client.user.Id)
-                    {
-                        type = "client";
-                        message = mes.Content;
-                    }
-                    else
-                    {
-                        type = "server";
-                        message = $"{mes.SenderLogin()} : " + mes.Content;
-                    }
-                    AppendFormattedText(type, message);
-                }
-            }
-            else RichTextBox_СhatСontent.Document.Blocks.Clear();
+            
             */
 
         }

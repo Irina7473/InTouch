@@ -19,12 +19,16 @@ namespace ServerInTouch
             ClientConnection.Notify += log.RecordToLog;
 
             int port, amt;
+            port = 8005;
+            amt = 10;
+            /*
             Console.WriteLine("Введите номер порта");
             var stringPort = Console.ReadLine();
             port = NumberCheck(stringPort);
             Console.WriteLine("Введите максимальное количество одновременных соединений");
             var stringAmt = Console.ReadLine();
-            amt = NumberCheck(stringAmt);    
+            amt = NumberCheck(stringAmt);  
+            */
             var server = new TcpServer(port, amt);
             server.StartTcpServer();
         }

@@ -44,6 +44,14 @@ namespace InTouchLibrary
             User = user;
         }
     }
+    public class MessageSendChat : MessageCreation
+    {
+        public DMChat Chat { get; set; }
+        public MessageSendChat(MessageType type, DMChat chat) : base(type)
+        {
+            Chat = chat;
+        }
+    }
 
     public class MessageSendContent : MessageCreation
     {
@@ -59,8 +67,11 @@ namespace InTouchLibrary
         info,
         warn,
         error,
+        recd,
         ident,
         user,
-        content
+        chat,
+        content,
+        leave
     }
 }

@@ -39,9 +39,14 @@ namespace InTouchLibrary
         
         public DMUser ReceiveUser()
         {
+            // получаю user с сервера
             var message = Read();
-            var mesCreat = JsonSerializer.Deserialize<MessageSendUser>(message);
-            if (mesCreat.Type == MessageType.user) user= mesCreat.User;
+            var mesCreat = JsonSerializer.Deserialize<MessageSendUser>(message); 
+            if (mesCreat.Type == MessageType.user)
+            {
+                user = mesCreat.User;
+                
+            }
             return user;
         }
 
@@ -125,7 +130,9 @@ namespace InTouchLibrary
         }
 
         public void Close()
-        {            
+        {
+            var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation (MessageType.leave, "Закрываю соединение"));
+            Send(message);
             if (client !=null) client.Close();
             if (_netStream !=null) _netStream.Close();
             Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение с сервером закрыто");
