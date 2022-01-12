@@ -131,7 +131,7 @@ namespace InTouchLibrary
 
         public void Close()
         {
-            var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation (MessageType.leave, "Закрываю соединение"));
+            var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo (MessageType.leave, "Закрываю соединение"));
             Send(message);
             if (client !=null) client.Close();
             if (_netStream !=null) _netStream.Close();

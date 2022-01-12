@@ -63,9 +63,9 @@ namespace ClientInTouch
                     password = TextBox_Password.Text.ToString();
                     client.ConnectToServer(ip, port, login, password);
                     message = client.Read();
-                    var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                    var mesCreat = JsonSerializer.Deserialize<MessageInfo>(message);
                     if (mesCreat.Type == MessageType.error) MessageBox.Show(mesCreat.Mes);
-                    else if (mesCreat.Type == MessageType.ident)
+                    else if (mesCreat.Type == MessageType.recd)
                     {
                         MessageBox.Show($"{mesCreat.Mes}");
                         this.DialogResult = true;

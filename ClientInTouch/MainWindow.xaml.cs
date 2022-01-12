@@ -75,7 +75,7 @@ namespace ClientInTouch
                 Button_Entry.IsEnabled = false;
                 // получаю чаты user и добавляю в список чатов
                 foreach (var chat in client.user.Chats) chats.Add(chat);
-                message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.recd, string.Empty));
+                message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
                 client.Send(message);
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();

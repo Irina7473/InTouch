@@ -30,14 +30,14 @@ namespace InTouchLibrary
                 var ident = Identification(numberTouch);
                 if (ident)
                 {
-                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.ident, $"{user.Login} авторизован"));
+                    var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, $"{user.Login} авторизован"));
                     Send(message);
                     Notify?.Invoke(LogType.info, $"{DateTime.Now} Для соединения {numberTouch} успешный вход");
                     Communication();
                 }
                 else
                 {
-                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.error, "Неверный логин или пароль"));
+                    var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.error, "Неверный логин или пароль"));
                     Send(message);
                     Close();
                     Notify?.Invoke(LogType.warn, $"{DateTime.Now} Для соединения {numberTouch} неверный логин или пароль");

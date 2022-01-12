@@ -8,21 +8,42 @@ using DataBaseActions;
 
 namespace InTouchLibrary
 {
+    public enum MessageType
+    {
+        info,
+        warn,
+        error,
+        recd,
+        ident,
+        user,
+        chat,
+        content,
+        leave
+    }
+
     public class MessageCreation
     {
         public MessageType Type { get; set; }
-        public string Mes { get; set; }
+        /*public string Mes { get; set; }
 
         public MessageCreation() { }
         public MessageCreation(MessageType type, string message)
         {
             Type = type;
             Mes = message;
-        }
+        }*/
+
         public MessageCreation(MessageType type)
         {
             Type = type;
         }
+    }
+
+    public class MessageInfo : MessageCreation
+    {
+        public string Mes { get; set; }
+        public MessageInfo (MessageType type, string mes) : base(type)
+        { Mes = mes; }
     }
 
     public class MessageIdent : MessageCreation
@@ -62,16 +83,4 @@ namespace InTouchLibrary
         }
     }
 
-    public enum MessageType
-    {
-        info,
-        warn,
-        error,
-        recd,
-        ident,
-        user,
-        chat,
-        content,
-        leave
-    }
 }
