@@ -42,9 +42,9 @@ namespace ClientInTouch
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
 
-        ObservableCollection<DMUser> users;
+        //ObservableCollection<DMUser> users;
         ObservableCollection<DMChat> chats;
-        ObservableCollection<DMMessage> dialog;
+        //ObservableCollection<DMMessage> dialog;
         public MainWindow()
         {
             InitializeComponent();
@@ -56,9 +56,9 @@ namespace ClientInTouch
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
 
-            users = new ObservableCollection<DMUser> { };
+            //users = new ObservableCollection<DMUser> { };
             chats = new ObservableCollection<DMChat> { };
-            dialog = new ObservableCollection<DMMessage> { };
+            //dialog = new ObservableCollection<DMMessage> { };
             ChatsList.ItemsSource = chats;
         }
 
@@ -77,7 +77,7 @@ namespace ClientInTouch
                 foreach (var chat in client.user.Chats) chats.Add(chat);
                 message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
                 client.Send(message);
-                taskRead = new(() => { ReceivedAsync(); });
+                taskRead = new(() => { Received(); });
                 taskRead.Start();
             }
             else MessageBox.Show("Авторизация не пройдена");
@@ -96,13 +96,34 @@ namespace ClientInTouch
             */
         }
 
-        private async void ReceivedAsync()
+        private void Received()
         {
             if (client.client.Connected)
             {
                 while (client.client.Connected)
                 {
-                    message = client.Read();
+                    if (cancelTokenRead != null) return;
+                    try
+                    {
+                        using (cancelTokenRead = new CancellationTokenSource())
+
+                        message = client.Read();
+                        var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                        if (mesCreat.Type == MessageType.content)
+                        {
+                            try
+                            {
+                                var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
+                                foreach (var chat in chats)
+                                    if (chat.Id == mesSend.Message.ChatId)
+                                        chat.Messages.Add(mesSend.Message);
+                            }
+                            catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
+                        }
+                    }
+                    catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
+                    finally { cancelTokenRead = null; }
+                    /*
                     if (cancelTokenRead != null) return;
                     try
                     {
@@ -111,6 +132,7 @@ namespace ClientInTouch
                     }
                     catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
                     finally { cancelTokenRead = null; }
+                    */
                 }
             }
             else
@@ -133,8 +155,7 @@ namespace ClientInTouch
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {//вариант 1
-            
+        {
             RichTextBox_СhatСontent.Document.Blocks.Clear();
             var chat = (DMChat)((ListBox)sender).SelectedItem;
             //var messages = chat.ChatMessages(); // сообщения пока добавляются только при смене чата, надо их получить с сервера
@@ -162,12 +183,6 @@ namespace ClientInTouch
                 }
             }
             else RichTextBox_СhatСontent.Document.Blocks.Clear();
-            
-            /*
-            //вариант2
-            
-            */
-
         }
 
         private async void Button_Send_Click(object sender, RoutedEventArgs e)
