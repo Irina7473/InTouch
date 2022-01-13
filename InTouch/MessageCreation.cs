@@ -21,6 +21,8 @@ namespace InTouchLibrary
         leave
     }
 
+    // Попробовать позже отказаться от конструкторов совсем
+
     public class MessageCreation
     {
         public MessageType Type { get; set; }

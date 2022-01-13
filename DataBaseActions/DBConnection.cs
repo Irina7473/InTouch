@@ -143,7 +143,11 @@ namespace DataBaseActions
                     Open();            
                     _query.CommandText = "INSERT INTO table_messages (messageType, time, senderId, chatId, content)" +
                     "VALUES (@type, @time, @senderId, @chatId, @content)";
-                    try { _query.ExecuteNonQuery(); }
+                    try 
+                    { 
+                        _query.ExecuteNonQuery(); 
+                        Notify?.Invoke(LogType.info, $"Сообщение от пользователя {message.SenderId} в чат {message.ChatId} записано"); 
+                    }
                     catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString()); }
                     Close();
                 }
