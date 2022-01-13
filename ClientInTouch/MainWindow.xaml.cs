@@ -41,8 +41,20 @@ namespace ClientInTouch
         public Task taskRead;
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
-        ObservableCollection<DMChat> chats;
-        List<DMChat> CHATS;
+
+        private readonly object chatsLock;
+        public ObservableCollection<DMChat> chats;
+        public ObservableCollection<DMChat> Chats
+        {
+            get { return chats; }
+            set
+            {
+                chats = value;
+                BindingOperations.EnableCollectionSynchronization(chats, chatsLock);
+            }
+        }
+            
+        //List<DMChat> CHATS;
         //List<ListViewItem> CHATS;
 
         public MainWindow()
@@ -55,9 +67,11 @@ namespace ClientInTouch
             Client.Notify += log.RecordToLog;
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
+
+            chatsLock = new();
             chats = new();            
-            CHATS = new();
-            ChatsList.ItemsSource = CHATS;
+            //CHATS = new();
+            ChatsList.ItemsSource = chats;
         }
 
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
@@ -72,9 +86,9 @@ namespace ClientInTouch
                 Button_Entry.Content = client.user.Login;  
                 Button_Entry.IsEnabled = false;
                 // получаю чаты user и добавляю в список чатов
-                foreach (var chat in client.user.Chats) CHATS.Add(chat);
-                ChatsList.ItemsSource = CHATS;
-                ChatsList.Items.Refresh();
+                foreach (var chat in client.user.Chats) chats.Add(chat);
+                //ChatsList.ItemsSource = CHATS;
+                //ChatsList.Items.Refresh();
                 message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
                 client.Send(message);
                 taskRead = new(() => { ReceivedAsync(); });
@@ -108,8 +122,14 @@ namespace ClientInTouch
                     {
                         try
                         {
-                                var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
-                                if (cancelTokenRead != null) return;
+                            var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
+                            mesSend.Message.Status = true;
+                            MessageBox.Show(message);
+                            for (var i = 0; i < chats.Count; i++)
+                                if (chats[i].Id == mesSend.Message.ChatId)
+                                    chats[i].Messages.Add(mesSend.Message);
+                            /*
+                            if (cancelTokenRead != null) return;
                                 try
                                 {
                                     using (cancelTokenRead = new CancellationTokenSource())
@@ -117,11 +137,8 @@ namespace ClientInTouch
                                 }
                                 catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
                                 finally { cancelTokenRead = null; }
-                            /*
-                            mesSend.Message.Status = true;
-                            foreach (var chat in chats)
-                                if (chat.Id == mesSend.Message.ChatId)
-                                    chat.Messages.Add(mesSend.Message);*/
+                            */
+                            
                         }
                         catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
                     }
@@ -302,25 +319,22 @@ namespace ClientInTouch
                 await Task.Delay(10, token);
             }, DispatcherPriority.Normal, token);
         }
-        
+        /*
         private async Task UpdateChatsListAsync(MessageSendContent mesSend, CancellationToken token)
         {
             await ChatsList.Dispatcher.Invoke(async () =>
             {
                 mesSend.Message.Status = true;
                 for (var i=0; i < CHATS.Count; i++)
-                    CHATS[i].Messages.Add(mesSend.Message);
-                /*
-                foreach (var chat in chats) // заменить for
-                    if (chat.Id == mesSend.Message.ChatId)
-                        chat.Messages.Add(mesSend.Message);*/
-
+                    if (CHATS[i].Id == mesSend.Message.ChatId)
+                        CHATS[i].Messages.Add(mesSend.Message);
+                
                 ChatsList.ItemsSource = CHATS;
                 ChatsList.Items.Refresh();
                 await Task.Delay(10, token);
             }, DispatcherPriority.Normal, token);
 
         }
-
+        */
     }
 }
