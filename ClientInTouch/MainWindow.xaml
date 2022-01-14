@@ -40,11 +40,9 @@
                                 <Button Name="Button_AccountSettings" Content="Настройка аккаунтов"
                                         Click="Button_AccountSettings_Click" 
                                         Style="{DynamicResource style_ButtonMenu}"/>
-                            
                         </MenuItem>
                             <MenuItem Header="О программе" />
                             <MenuItem Header="Справка" />
-                            
                         </MenuItem>
                     </Menu>
                     
@@ -93,19 +91,15 @@
                     <Button Name="Button_Entry" Content="ВХОД"
                             Click="Button_Entry_Click"
                             Width="100"  Style="{DynamicResource style_Button}" />
-                    
                     <Menu Width="30" Margin="420 10 20 10">
                         <Menu.Background>
                             <ImageBrush ImageSource="Resources/logo30circ.png" />
                         </Menu.Background>
                         <MenuItem Width="30" Height="30">
-                            
                             <MenuItem Header="Телефон техподдержки +7 951 799 06 90" />
                             <MenuItem Header="Лицензия от ООО Академия ШАГ №199011495" />
-
                         </MenuItem>
                     </Menu>
-
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" Background="PaleTurquoise">
