@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInTouch"
         mc:Ignorable="d"
-        Title="InTouch" Height="600" Width="900" Background="LightSeaGreen">
+        Title="InTouch" Height="600" Width="900" Background="LightSeaGreen" >
     <Window.Resources>
         <ResourceDictionary Source="Style.xaml" />
     </Window.Resources>
@@ -23,7 +23,7 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    <Menu x:Name="Menu" Width="30" Margin="10">
+                    <Menu x:Name="Menu" Width="30" Margin="10 5 5 5">
                         <Menu.Background>
                             <ImageBrush ImageSource="Resources/settings.png" />
                         </Menu.Background>
@@ -49,11 +49,11 @@
                     </Menu>
                     
                     <TextBox x:Name="TextBox_SearchContact" Text="Поиск"
-                             Width="150" Margin="5" Background="PaleTurquoise" Foreground="Gray"
+                             Width="190" Margin="5" Background="AliceBlue" Foreground="Gray"
                              GotFocus="TextBox_SearchContact_GotFocus" LostFocus="TextBox_SearchContact_LostFocus"/>
                     <Button Name="Button_AddChat" Content="+"
                             Click="Button_AddChat_Click"
-                            Style="{DynamicResource style_Button}" />
+                            Margin="5 5 10 5" Style="{DynamicResource style_Button}" />
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" >
@@ -93,12 +93,24 @@
                     <Button Name="Button_Entry" Content="ВХОД"
                             Click="Button_Entry_Click"
                             Width="100"  Style="{DynamicResource style_Button}" />
+                    
+                    <Menu Width="30" Margin="420 10 20 10">
+                        <Menu.Background>
+                            <ImageBrush ImageSource="Resources/logo30circ.png" />
+                        </Menu.Background>
+                        <MenuItem Width="30" Height="30">
+                            
+                            <MenuItem Header="Телефон техподдержки +7 951 799 06 90" />
+                            <MenuItem Header="Лицензия от ООО Академия ШАГ №199011495" />
+
+                        </MenuItem>
+                    </Menu>
+
                 </StackPanel>
-            </Grid>            
-            <Grid Grid.Row="1">
+            </Grid>
+            <Grid Grid.Row="1" Background="PaleTurquoise">
                 <ScrollViewer>
-                    <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                              Style="{DynamicResource style_RichTextBoxСhatСontent}" />
+                    <RichTextBox x:Name="RichTextBox_СhatСontent" FontSize="15"/>
                 </ScrollViewer>
             </Grid>
             <Grid Grid.Row="3">
