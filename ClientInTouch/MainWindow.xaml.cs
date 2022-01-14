@@ -42,9 +42,21 @@ namespace ClientInTouch
         private CancellationTokenSource cancelTokenSend;
         private CancellationTokenSource cancelTokenRead;
 
-        ObservableCollection<DMUser> users;
-        ObservableCollection<DMChat> chats;
-        ObservableCollection<DMMessage> dialog;
+        private readonly object chatsLock;
+        public ObservableCollection<DMChat> chats;
+        public ObservableCollection<DMChat> Chats
+        {
+            get { return chats; }
+            set
+            {
+                chats = value;
+                BindingOperations.EnableCollectionSynchronization(chats, chatsLock);
+            }
+        }
+            
+        //List<DMChat> CHATS;
+        //List<ListViewItem> CHATS;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -56,9 +68,9 @@ namespace ClientInTouch
             Closed += Exit;
             RichTextBox_СhatСontent.IsEnabled = false;
 
-            users = new ObservableCollection<DMUser> { };
-            chats = new ObservableCollection<DMChat> { };
-            dialog = new ObservableCollection<DMMessage> { };
+            chatsLock = new();
+            chats = new();            
+            //CHATS = new();
             ChatsList.ItemsSource = chats;
         }
 
@@ -75,7 +87,9 @@ namespace ClientInTouch
                 Button_Entry.IsEnabled = false;
                 // получаю чаты user и добавляю в список чатов
                 foreach (var chat in client.user.Chats) chats.Add(chat);
-                message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.recd, string.Empty));
+                //ChatsList.ItemsSource = CHATS;
+                //ChatsList.Items.Refresh();
+                message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
                 client.Send(message);
                 taskRead = new(() => { ReceivedAsync(); });
                 taskRead.Start();
@@ -96,21 +110,38 @@ namespace ClientInTouch
             */
         }
 
-        private async void ReceivedAsync()
+        private async Task ReceivedAsync()
         {
             if (client.client.Connected)
             {
                 while (client.client.Connected)
                 {
                     message = client.Read();
-                    if (cancelTokenRead != null) return;
-                    try
+                    var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                    if (mesCreat.Type == MessageType.content)
                     {
-                        using (cancelTokenRead = new CancellationTokenSource())
-                        { await AppendFormattedTextAsync("server", message, cancelTokenRead.Token); }
+                        try
+                        {
+                            var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
+                            mesSend.Message.Status = true;
+                            MessageBox.Show(message);
+                            for (var i = 0; i < chats.Count; i++)
+                                if (chats[i].Id == mesSend.Message.ChatId)
+                                    chats[i].Messages.Add(mesSend.Message);
+                            /*
+                            if (cancelTokenRead != null) return;
+                                try
+                                {
+                                    using (cancelTokenRead = new CancellationTokenSource())
+                                    { await UpdateChatsListAsync(mesSend, cancelTokenRead.Token); }
+                                }
+                                catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
+                                finally { cancelTokenRead = null; }
+                            */
+                            
+                        }
+                        catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
                     }
-                    catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
-                    finally { cancelTokenRead = null; }
                 }
             }
             else
@@ -133,8 +164,7 @@ namespace ClientInTouch
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {//вариант 1
-            
+        {
             RichTextBox_СhatСontent.Document.Blocks.Clear();
             var chat = (DMChat)((ListBox)sender).SelectedItem;
             //var messages = chat.ChatMessages(); // сообщения пока добавляются только при смене чата, надо их получить с сервера
@@ -162,12 +192,6 @@ namespace ClientInTouch
                 }
             }
             else RichTextBox_СhatСontent.Document.Blocks.Clear();
-            
-            /*
-            //вариант2
-            
-            */
-
         }
 
         private async void Button_Send_Click(object sender, RoutedEventArgs e)
@@ -295,6 +319,22 @@ namespace ClientInTouch
                 await Task.Delay(10, token);
             }, DispatcherPriority.Normal, token);
         }
+        /*
+        private async Task UpdateChatsListAsync(MessageSendContent mesSend, CancellationToken token)
+        {
+            await ChatsList.Dispatcher.Invoke(async () =>
+            {
+                mesSend.Message.Status = true;
+                for (var i=0; i < CHATS.Count; i++)
+                    if (CHATS[i].Id == mesSend.Message.ChatId)
+                        CHATS[i].Messages.Add(mesSend.Message);
                 
+                ChatsList.ItemsSource = CHATS;
+                ChatsList.Items.Refresh();
+                await Task.Delay(10, token);
+            }, DispatcherPriority.Normal, token);
+
+        }
+        */
     }
 }

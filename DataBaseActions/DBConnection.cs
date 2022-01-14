@@ -12,12 +12,12 @@ namespace DataBaseActions
     public class DBConnection
     {
         public static event Action<LogType, string> Notify;
-        string connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;convert zero datetime=True;";
+        private string _connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;convert zero datetime=True;";
         private MySqlConnection _connection;
         private MySqlCommand _query;
         public DBConnection()
         {
-            _connection = new MySqlConnection(connectionString);
+            _connection = new MySqlConnection(_connectionString);
             _query = new MySqlCommand
             {
                 Connection = _connection
@@ -143,11 +143,23 @@ namespace DataBaseActions
                     Open();            
                     _query.CommandText = "INSERT INTO table_messages (messageType, time, senderId, chatId, content)" +
                     "VALUES (@type, @time, @senderId, @chatId, @content)";
-                    try { _query.ExecuteNonQuery(); }
+                    try 
+                    { 
+                        _query.ExecuteNonQuery(); 
+                        Notify?.Invoke(LogType.info, $"Сообщение от пользователя {message.SenderId} в чат {message.ChatId} записано"); 
+                    }
                     catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString()); }
                     Close();
                 }
             }
+        }
+        public void UpdateMessageStatus (int idMes)
+        {            
+            Open();
+            _query.CommandText = $"UPDATE table_messages SET status=1 WHERE id='{idMes}';";
+            try { _query.ExecuteNonQuery(); }
+            catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString()); }
+            Close();
         }
 
         //Запросы к БД
@@ -364,6 +376,37 @@ namespace DataBaseActions
                     mes.DateTime = result.GetDateTime(2);
                     mes.SenderId = result.GetInt32(3); 
                     mes.ChatId= result.GetInt32(4);
+                    mes.Content = result.GetString(5);
+                    mes.Status = result.GetBoolean(6);
+                    messages.Add(mes);
+                }
+                Close();
+                return messages;
+            }
+        }
+
+        public List<DMMessage> FindMessagesStatus (int idChat)
+        {
+            var messages = new List<DMMessage>();
+            Open();
+            _query.CommandText = $"SELECT * FROM table_messages WHERE chatId='{idChat}' AND status='0';";
+            var result = _query.ExecuteReader();
+            if (!result.HasRows)
+            {
+                //Notify?.Invoke(LogType.warn, $"Нет недоставленных сообщений в чате {idChat}");
+                Close();
+                return null;
+            }
+            else
+            {
+                while (result.Read())
+                {
+                    var mes = new DMMessage();
+                    mes.Id = result.GetInt32(0);
+                    mes.MessageType = result.GetString(1);
+                    mes.DateTime = result.GetDateTime(2);
+                    mes.SenderId = result.GetInt32(3);
+                    mes.ChatId = result.GetInt32(4);
                     mes.Content = result.GetString(5);
                     mes.Status = result.GetBoolean(6);
                     messages.Add(mes);

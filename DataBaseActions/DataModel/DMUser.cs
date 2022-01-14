@@ -8,10 +8,7 @@ namespace DataBaseActions
         public int Id { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }
-        public byte[] Avatar { get; set; }  // Добавит сам user
+        public byte[] Avatar { get; set; }
         public List <DMChat> Chats { get; set; } //формируется из table_Contacts
-
-        public DMUser() { }
-
     }
 }

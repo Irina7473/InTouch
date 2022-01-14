@@ -98,7 +98,7 @@
             <Grid Grid.Row="1">
                 <ScrollViewer>
                     <RichTextBox x:Name="RichTextBox_СhatСontent" 
-                              Background="AliceBlue" />
+                              Style="{DynamicResource style_RichTextBoxСhatСontent}" />
                 </ScrollViewer>
             </Grid>
             <Grid Grid.Row="3">

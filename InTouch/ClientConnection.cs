@@ -30,14 +30,14 @@ namespace InTouchLibrary
                 var ident = Identification(numberTouch);
                 if (ident)
                 {
-                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.ident, $"{user.Login} авторизован"));
+                    var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, $"{user.Login} авторизован"));
                     Send(message);
-                    Notify?.Invoke(LogType.info, $"{DateTime.Now} Для соединения {numberTouch} успешный вход");
+                    Notify?.Invoke(LogType.info, $"{DateTime.Now} Для соединения {numberTouch} успешный вход пользователя {user.Login}");
                     Communication();
                 }
                 else
                 {
-                    var message = JsonSerializer.Serialize<MessageCreation>(new MessageCreation(MessageType.error, "Неверный логин или пароль"));
+                    var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.error, "Неверный логин или пароль"));
                     Send(message);
                     Close();
                     Notify?.Invoke(LogType.warn, $"{DateTime.Now} Для соединения {numberTouch} неверный логин или пароль");
@@ -58,19 +58,22 @@ namespace InTouchLibrary
             else
             {
                 var db = new DBConnection();
-                user = db.FindUser(mesCreat.Login, mesCreat.Password); //создан на сервере user с List <DMChat> Chats
-                if (user!=null) return true;
+                user = db.FindUser(mesCreat.Login, mesCreat.Password); //создан на сервере user со списком его чатов
+                if (user != null) return true;
                 else return false;
             }
         }
 
-        public void Communication()  // выделить получение первых данных в идентификацию
+        public void Communication() 
         {
-            string message;
-            // Формирую для user  List<DMMessage>Messages для каждого его чата из List <DMChat> Chats 
-            foreach (var chat in user.Chats) chat.Messages = chat.ChatMessages();
-            // Передаю user с List <DMChat> Chats и List<DMMessage>Messages для каждого его чата с сервера клиенту
-            message = JsonSerializer.Serialize<MessageSendUser>(new MessageSendUser(MessageType.user, user));
+            // Формирую для user список собщений для каждого его чата 
+            foreach (var chat in user.Chats)
+            {
+                var db = new DBConnection();
+                chat.Messages = db.FindMessageToChat(chat.Id);
+            }
+            // Передаю клиенту user со списком сообщений для каждого его чата
+            var message = JsonSerializer.Serialize<MessageSendUser>(new MessageSendUser(MessageType.user, user));
             Notify?.Invoke(LogType.info, message);
             Send(message);
             // Получаю от клиента подтверждение получения чатов и сообщений
@@ -78,62 +81,80 @@ namespace InTouchLibrary
             var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
             if (mesCreat.Type == MessageType.recd)
             {
-
-
-                /*  Проверка новых сообщений НУЖНА
-                Task taskSend = new(() => { 
-                //проверяю сообщения со статусом 0 у подключенных клиентов, посылаю им и меняю статус на 1
-                    Send("Hello");                
-                    Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} переданы сообщения");
-                });
-                taskSend.Start();*/
-
+                //  Отправка новых сообщений 
+                Task taskSend = new(() => { Sender(); });
+                taskSend.Start();
                 // Запуск чтения 
-                Task taskRead = new(() =>
-                {
-                    while (client.Connected)
-                    {
-                        var message = Read();
-                        var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
-                        if (mesCreat.Type == MessageType.leave) Close();
-                        else
-                        {
-                            if (mesCreat.Type == MessageType.user) //Добавить user в БД
-                            {
-                                try
-                                {
-                                    var mesSend = JsonSerializer.Deserialize<MessageSendUser>(message);
-                                    var db = new DBConnection();
-                                    db.RecordToUser(mesSend.User);
-                                }
-                                catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
-                            }
-                            if (mesCreat.Type == MessageType.chat) //Добавить чат в БД
-                            {
-                                try
-                                {
-                                    var mesSend = JsonSerializer.Deserialize<MessageSendChat>(message);
-                                    var db = new DBConnection();
-                                    db.RecordToChat(mesSend.Chat);
-                                }
-                                catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
-                            }
-                            if (mesCreat.Type == MessageType.content) //Добавить сообщение в БД
-                            {
-                                try
-                                {
-                                    var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
-                                    var db = new DBConnection();
-                                    db.RecordToMessage(mesSend.Message);
-                                }
-                                catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
-                            }
-                        }
-                    }
-                });
+                Task taskRead = new(() => { Reader(); });
                 taskRead.Start();
             }
-        }        
+        }  
+        
+        void Sender ()
+        {
+            while (client.Connected)
+            {
+                //проверяю сообщения со статусом 0 у подключенных клиентов, посылаю им и меняю статус на 1
+                int cout = 0;
+                foreach (var chat in user.Chats)
+                {
+                    var db = new DBConnection();
+                    var messages = db.FindMessagesStatus(chat.Id);
+                    if (messages != null)
+                        foreach (var mes in messages)
+                        {
+                            var message = JsonSerializer.Serialize(mes);
+                            Send(message);
+                            db.UpdateMessageStatus(mes.Id);
+                            cout++;
+                        }
+                }
+                if (cout>0)Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
+            }
+        }
+        
+        void Reader()
+        {
+            while (client.Connected)
+            {
+                var message = Read();
+                var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                if (mesCreat.Type == MessageType.leave) Close();
+                else
+                {
+                    if (mesCreat.Type == MessageType.user) //Добавляю user в БД
+                    {
+                        try
+                        {
+                            var mesSend = JsonSerializer.Deserialize<MessageSendUser>(message);
+                            var db = new DBConnection();
+                            db.RecordToUser(mesSend.User);
+                        }
+                        catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
+                    }
+                    if (mesCreat.Type == MessageType.chat) //Добавляю чат в БД
+                    {
+                        try
+                        {
+                            var mesSend = JsonSerializer.Deserialize<MessageSendChat>(message);
+                            var db = new DBConnection();
+                            db.RecordToChat(mesSend.Chat);
+                        }
+                        catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
+                    }
+                    if (mesCreat.Type == MessageType.content) //Добавляю сообщение в БД
+                    {
+                        try
+                        {
+                            var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
+                            var db = new DBConnection();
+                            db.RecordToMessage(mesSend.Message);
+                        }
+                        catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
+                    }
+                }
+            }
+        }
 
         public void Send(string message)
         {
