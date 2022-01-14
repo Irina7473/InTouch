@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <None Remove="Resources\account_black.jpg" />
+    <None Remove="Resources\logo30.png" />
+    <None Remove="Resources\logo30circ.png" />
     <None Remove="Resources\lupa2.png" />
     <None Remove="Resources\plus_green.png" />
     <None Remove="Resources\settings.png" />
@@ -24,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\account_black.jpg">
+    <Resource Include="Resources\logo30.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\logo30circ.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\lupa2.png">

@@ -159,14 +159,6 @@
             <Setter Property="FontSize" Value="20" />
         </Style.Setters>
     </Style>
-
-    <Style x:Key="style_RichTextBoxСhatСontent" TargetType="RichTextBox">
-        <Style.Setters>
-            <Setter Property="Background" Value="AliceBlue" />
-            <Setter Property="FontSize" Value="15" />
-        </Style.Setters>
-    </Style>
-
     <!-- не получилось выделить-->
     <Style x:Key="style_ListBoxItem" TargetType="ListBoxItem">
         <Style.Triggers>
