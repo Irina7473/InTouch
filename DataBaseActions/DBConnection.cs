@@ -12,12 +12,12 @@ namespace DataBaseActions
     public class DBConnection
     {
         public static event Action<LogType, string> Notify;
-        string connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;convert zero datetime=True;";
+        private string _connectionString = "Server=mysql60.hostland.ru;Database=host1323541_itstep31;Uid=host1323541_itstep;Pwd=269f43dc;convert zero datetime=True;";
         private MySqlConnection _connection;
         private MySqlCommand _query;
         public DBConnection()
         {
-            _connection = new MySqlConnection(connectionString);
+            _connection = new MySqlConnection(_connectionString);
             _query = new MySqlCommand
             {
                 Connection = _connection

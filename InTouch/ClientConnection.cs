@@ -59,18 +59,19 @@ namespace InTouchLibrary
             {
                 var db = new DBConnection();
                 user = db.FindUser(mesCreat.Login, mesCreat.Password); //создан на сервере user со списком его чатов
-                if (user != null)
-                {
-                    // Формирую для user список собщений для каждого его чата 
-                    foreach (var chat in user.Chats) chat.Messages = chat.ChatMessages();
-                    return true;
-                }
+                if (user != null) return true;
                 else return false;
             }
         }
 
-        public void Communication()  // выделить получение первых данных в идентификацию
-        {            
+        public void Communication() 
+        {
+            // Формирую для user список собщений для каждого его чата 
+            foreach (var chat in user.Chats)
+            {
+                var db = new DBConnection();
+                chat.Messages = db.FindMessageToChat(chat.Id);
+            }
             // Передаю клиенту user со списком сообщений для каждого его чата
             var message = JsonSerializer.Serialize<MessageSendUser>(new MessageSendUser(MessageType.user, user));
             Notify?.Invoke(LogType.info, message);
@@ -81,16 +82,10 @@ namespace InTouchLibrary
             if (mesCreat.Type == MessageType.recd)
             {
                 //  Отправка новых сообщений 
-                Task taskSend = new(() => {
-                    Sender();
-                });
+                Task taskSend = new(() => { Sender(); });
                 taskSend.Start();
-
                 // Запуск чтения 
-                Task taskRead = new(() =>
-                {
-                    Reader();
-                });
+                Task taskRead = new(() => { Reader(); });
                 taskRead.Start();
             }
         }  
@@ -127,7 +122,7 @@ namespace InTouchLibrary
                 if (mesCreat.Type == MessageType.leave) Close();
                 else
                 {
-                    if (mesCreat.Type == MessageType.user) //Добавить user в БД
+                    if (mesCreat.Type == MessageType.user) //Добавляю user в БД
                     {
                         try
                         {
@@ -137,7 +132,7 @@ namespace InTouchLibrary
                         }
                         catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
                     }
-                    if (mesCreat.Type == MessageType.chat) //Добавить чат в БД
+                    if (mesCreat.Type == MessageType.chat) //Добавляю чат в БД
                     {
                         try
                         {
@@ -147,7 +142,7 @@ namespace InTouchLibrary
                         }
                         catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
                     }
-                    if (mesCreat.Type == MessageType.content) //Добавить сообщение в БД
+                    if (mesCreat.Type == MessageType.content) //Добавляю сообщение в БД
                     {
                         try
                         {

@@ -26,19 +26,8 @@ namespace InTouchLibrary
     public class MessageCreation
     {
         public MessageType Type { get; set; }
-        /*public string Mes { get; set; }
-
-        public MessageCreation() { }
-        public MessageCreation(MessageType type, string message)
-        {
-            Type = type;
-            Mes = message;
-        }*/
-
         public MessageCreation(MessageType type)
-        {
-            Type = type;
-        }
+        { Type = type;}
     }
 
     public class MessageInfo : MessageCreation
@@ -63,26 +52,19 @@ namespace InTouchLibrary
     {
         public DMUser User { get; set; }
         public MessageSendUser(MessageType type, DMUser user) : base(type)
-        {
-            User = user;
-        }
+        { User = user;}
     }
     public class MessageSendChat : MessageCreation
     {
         public DMChat Chat { get; set; }
         public MessageSendChat(MessageType type, DMChat chat) : base(type)
-        {
-            Chat = chat;
-        }
+        { Chat = chat; }
     }
 
     public class MessageSendContent : MessageCreation
     {
         public DMMessage Message { get; set; }
         public MessageSendContent(MessageType type, DMMessage message) : base(type)
-        {
-            Message = message;
-        }
+        { Message = message; }
     }
-
 }

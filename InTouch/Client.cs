@@ -45,7 +45,6 @@ namespace InTouchLibrary
             if (mesCreat.Type == MessageType.user)
             {
                 user = mesCreat.User;
-                
             }
             return user;
         }

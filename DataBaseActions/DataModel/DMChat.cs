@@ -11,13 +11,5 @@ namespace DataBaseActions
         public byte[] Avatar { get; set; }
         //public List<string> Users { get; set; } //формируется из table_Contacts
         public List<DMMessage> Messages { get; set; } //формируется из table_Messages
-
-        public DMChat(){ }
-
-        public List<DMMessage> ChatMessages()
-        {
-            var db = new DBConnection();
-            return db.FindMessageToChat(Id);
-        }
     }
 }
