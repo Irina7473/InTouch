@@ -32,18 +32,19 @@ namespace ClientInTouch
     /// 
     public partial class MainWindow : Window
     {
-        public Client client;
-        //IPAddress ip;
-        //int port;
-        string message;
         public static event Action<LogType, string> Notify;
-        LogToFile log;        
-        public Task taskRead;
+        LogToFile log;
+                     
+        Task taskRead;
         private CancellationTokenSource cancelTokenSend;
-        private CancellationTokenSource cancelTokenRead;
+        //private CancellationTokenSource cancelTokenRead;
 
-        private readonly object chatsLock;
-        public ObservableCollection<DMChat> chats;
+        Client client;
+
+        //readonly object chatsLock = new object();
+        //private Mutex mutexChat;
+        private ObservableCollection<DMChat> chats;
+        /*
         public ObservableCollection<DMChat> Chats
         {
             get { return chats; }
@@ -53,27 +54,26 @@ namespace ClientInTouch
                 BindingOperations.EnableCollectionSynchronization(chats, chatsLock);
             }
         }
-            
-        //List<DMChat> CHATS;
-        //List<ListViewItem> CHATS;
+            */
 
         public MainWindow()
         {
             InitializeComponent();
-            client = new();
+            RichTextBox_СhatСontent.IsEnabled = false;
+            Closed += Exit;
             log = new();
-            message = string.Empty;
             Notify += log.RecordToLog;
             Client.Notify += log.RecordToLog;
-            Closed += Exit;
-            RichTextBox_СhatСontent.IsEnabled = false;
+                        
+            client = new();
 
-            chatsLock = new();
-            chats = new();            
-            //CHATS = new();
+            //chatsLock = new();
+            //mutexChat = new ();
+
+            chats = new();
             ChatsList.ItemsSource = chats;
         }
-
+       
         private void Button_Entry_Click(object sender, RoutedEventArgs e)
         {
             EntryWindow entry = new ();
@@ -87,136 +87,126 @@ namespace ClientInTouch
                 Button_Entry.IsEnabled = false;
                 // получаю чаты user и добавляю в список чатов
                 foreach (var chat in client.user.Chats) chats.Add(chat);
-                //ChatsList.ItemsSource = CHATS;
-                //ChatsList.Items.Refresh();
-                message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
+                var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, string.Empty));
                 client.Send(message);
-                taskRead = new(() => { ReceivedAsync(); });
+                taskRead = new(() => { Received(); });
                 taskRead.Start();
             }
             else MessageBox.Show("Авторизация не пройдена");
-        }
-                
-        //Рудимент - удалить в дальнейшем
-        private void Button_Settings_Click(object sender, RoutedEventArgs e)
+        } 
+       
+        private void Received()
         {
-            /*
-            ip= IPAddress.Parse("127.0.0.1");
-            port = 8005;
-            client.ConnectToServer(ip, port, "login", "password");
-            
-            taskRead = new(() => { ReceivedAsync(); });
-            taskRead.Start();
-            */
-        }
-
-        private async Task ReceivedAsync()
-        {
-            if (client.client.Connected)
+            try
             {
                 while (client.client.Connected)
                 {
-                    message = client.Read();
-                    var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
+                    var mes = client.Read();
+                    var mesCreat = JsonSerializer.Deserialize<MessageCreation>(mes);
                     if (mesCreat.Type == MessageType.content)
                     {
                         try
                         {
-                            var mesSend = JsonSerializer.Deserialize<MessageSendContent>(message);
-                            mesSend.Message.Status = true;
-                            MessageBox.Show(message);
-                            for (var i = 0; i < chats.Count; i++)
-                                if (chats[i].Id == mesSend.Message.ChatId)
-                                    chats[i].Messages.Add(mesSend.Message);
-                            /*
-                            if (cancelTokenRead != null) return;
-                                try
-                                {
-                                    using (cancelTokenRead = new CancellationTokenSource())
-                                    { await UpdateChatsListAsync(mesSend, cancelTokenRead.Token); }
-                                }
-                                catch (Exception exc) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {exc.ToString()}"); }
-                                finally { cancelTokenRead = null; }
-                            */
-                            
+                            var mesSend = JsonSerializer.Deserialize<MessageSendContent>(mes);
+                            //mesSend.Message.Status = true;
+                            Notify?.Invoke(LogType.info, mesSend.Message.ToString());
+                            AddMessageToChat(mesSend.Message);
+                            int id =-1;
+                            lock (chats)
+                                // здесь не получаю доступ к основному потоку
+                            { id = ((DMChat)((ChatsList).SelectedItem)).Id; }
+                            if (mesSend.Message.ChatId == id) RefreshChatsList(id);
                         }
                         catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
                     }
                 }
             }
-            else
+            catch
             {
                 Notify?.Invoke(LogType.error, "Соединение с сервером разорвано");
                 MessageBox.Show("Соединение с сервером разорвано");
             }
         }
 
-        private void Button_AddChat_Click(object sender, RoutedEventArgs e)
+        private void AddMessageToChat(DMMessage message)
         {
-            // выбор чат или диалог с 1
-            //если чат - имя, для 1 взять логин собеседника
-            //если чат - выбор аватар, для 1 взять аватар собеседника, по умолчанию аватар из ресурсов
-            //запрос в БД списка user, выбор нужных
-            // создание Chat(string name, byte[] avatar, List<User> users) 
-            AddChatWindow addchat = new ();
-            addchat.Owner = this;
-            addchat.client = this.client;
+            lock (chats)
+            {
+                for (var i = 0; i < chats.Count; i++)
+                    if (chats[i].Id == message.ChatId)
+                    {
+                        Notify?.Invoke(LogType.info, $"Для {client.user.Id} в chats {chats[i].Messages.Count} сообщений");
+                        chats[i].Messages.Add(message);
+                        Notify?.Invoke(LogType.info, $"Для {client.user.Id} доставлено в chats {chats[i].Messages.Count}-е сообщение");
+                    }
+            }
         }
 
         private void ChatsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            RichTextBox_СhatСontent.Document.Blocks.Clear();
-            var chat = (DMChat)((ListBox)sender).SelectedItem;
-            //var messages = chat.ChatMessages(); // сообщения пока добавляются только при смене чата, надо их получить с сервера
-            //if (messages.Count != 0)
-            // получение сообщений конкретного чата user, нет новых
-            var messages = chat.Messages;  
-            if (messages!=null && messages.Count != 0)
-            {
-                foreach (var mes in messages)
-                {
-                    //RichTextBox_СhatСontent.AppendText(mes.Content);
-                    string type = string.Empty;
-                    string message = string.Empty;
-                    if (mes.SenderId == client.user.Id)
-                    {
-                        type = "client";
-                        message = mes.Content;
-                    }
-                    else
-                    {
-                        type = "server";
-                        message = $"{mes.SenderLogin()} : " + mes.Content;
-                    }
-                    AppendFormattedText(type, message);
-                }
-            }
-            else RichTextBox_СhatСontent.Document.Blocks.Clear();
+            var id = ((DMChat)((ListBox)sender).SelectedItem).Id;
+            RefreshChatsList(id);
         }
 
-        private async void Button_Send_Click(object sender, RoutedEventArgs e)
+        private void RefreshChatsList(int id)
+        {
+            RichTextBox_СhatСontent.Document.Blocks.Clear();
+            List<DMMessage> messages = new();
+            lock (chats)
+            {
+                foreach (var chat in chats)
+                    if (chat.Id == id)
+                        if (chat.Messages.Count != 0) messages = chat.Messages;
+                if (messages != null && messages.Count != 0)
+                {
+                    foreach (var mes in messages)
+                    {
+                        string type = string.Empty;
+                        string message = string.Empty;
+                        if (mes.SenderId == client.user.Id)
+                        {
+                            type = "client";
+                            message = mes.Content;
+                        }
+                        else
+                        {
+                            type = "server";
+                            message = $"{mes.SenderLogin()} : " + mes.Content;
+                        }
+                        AppendFormattedText(type, message);
+                    }
+                }
+            }
+        }
+
+        private void Button_Send_Click(object sender, RoutedEventArgs e)
         {
             if (client.client != null)
             {
                 if (client.client.Connected)
                 {
-                    var mes = new DMMessage();
-                    mes.MessageType = "text";
-                    mes.DateTime = DateTime.Now;
-                    mes.SenderId = client.user.Id;
-                    mes.ChatId = ((DMChat)((ChatsList).SelectedItem)).Id; 
-                    mes.Content = TextBox_Message.Text;
-                    if (cancelTokenSend != null) return;
-                    try
+                    if (TextBox_Message.Text != null && TextBox_Message.Text != string.Empty)
                     {
-                        using (cancelTokenSend = new CancellationTokenSource())
-                        { await AppendFormattedTextAsync("client", mes.Content, cancelTokenSend.Token); }
+                        var mes = new DMMessage();
+                        mes.MessageType = "text";
+                        mes.DateTime = DateTime.Now;
+                        mes.SenderId = client.user.Id;
+                        mes.ChatId = ((DMChat)((ChatsList).SelectedItem)).Id;
+                        mes.Content = TextBox_Message.Text;
+                        /*
+                        if (cancelTokenSend != null) return;
+                        try
+                        {
+                            using (cancelTokenSend = new CancellationTokenSource())
+                            { await AppendFormattedTextAsync("client", mes.Content, cancelTokenSend.Token); }
+                        }
+                        catch (Exception exc) { Notify?.Invoke(LogType.error, exc.Message); }
+                        finally { cancelTokenSend = null; }
+                        */
+                        var message = JsonSerializer.Serialize<MessageSendContent>(new MessageSendContent(MessageType.content, mes));
+                        client.Send(message);
+                        RefreshChatsList(mes.ChatId);
                     }
-                    catch (Exception exc) { Notify?.Invoke(LogType.error, exc.Message); }
-                    finally { cancelTokenSend = null;}
-                    TextBox_Message.Text = "";
-                    message = JsonSerializer.Serialize<MessageSendContent>(new MessageSendContent(MessageType.content, mes));
-                    client.Send(message);                    
                 }
                 else
                 {
@@ -229,8 +219,20 @@ namespace ClientInTouch
                 Notify?.Invoke(LogType.error, "Соединение с сервером не установлено");
                 MessageBox.Show("Соединение с сервером не установлено");
             }
-        }      
+            TextBox_Message.Text = string.Empty;
+        }
 
+        private void Button_AddChat_Click(object sender, RoutedEventArgs e)
+        {
+            // выбор чат или диалог с 1
+            //если чат - имя, для 1 взять логин собеседника
+            //если чат - выбор аватар, для 1 взять аватар собеседника, по умолчанию аватар из ресурсов
+            //запрос в БД списка user, выбор нужных
+            // создание Chat(string name, byte[] avatar, List<User> users) 
+            AddChatWindow addchat = new();
+            addchat.Owner = this;
+            addchat.client = this.client;
+        }
         private void TextBox_SearchContact_GotFocus(object sender, RoutedEventArgs e)
         {
             if (TextBox_SearchContact.Text == "Поиск")
@@ -241,7 +243,7 @@ namespace ClientInTouch
         }
         private void TextBox_SearchContact_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (TextBox_SearchContact.Text == "")
+            if (TextBox_SearchContact.Text == string.Empty)
             {
                 TextBox_SearchContact.Text = "Поиск";
                 TextBox_SearchContact.Foreground = Brushes.Gray;
@@ -251,7 +253,7 @@ namespace ClientInTouch
         {
             if (TextBox_Message.Text == "Написать сообщение")
             {
-                TextBox_Message.Text = "";
+                TextBox_Message.Text = string.Empty;
                 TextBox_Message.Foreground = Brushes.DarkGreen;
             }
         }

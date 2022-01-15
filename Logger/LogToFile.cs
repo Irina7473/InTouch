@@ -27,9 +27,6 @@ namespace Logger
                 using (StreamWriter writer = new(TotalPath, true))
                 { await writer.WriteLineAsync(text); }
             }
-            catch (InvalidOperationException)
-            { Notify?.Invoke(LogType.error, 
-                "Поток в настоящее время используется предыдущей операцией записи."); }
             catch (Exception e) { Notify?.Invoke(LogType.error, e.ToString());}
         }
 

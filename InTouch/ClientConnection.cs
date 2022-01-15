@@ -67,10 +67,10 @@ namespace InTouchLibrary
         public void Communication() 
         {
             // Формирую для user список собщений для каждого его чата 
-            foreach (var chat in user.Chats)
+            for (var i = 0; i < user.Chats.Count; i++)
             {
                 var db = new DBConnection();
-                chat.Messages = db.FindMessageToChat(chat.Id);
+                user.Chats[i].Messages = db.FindMessageToChat(user.Chats[i].Id);
             }
             // Передаю клиенту user со списком сообщений для каждого его чата
             var message = JsonSerializer.Serialize<MessageSendUser>(new MessageSendUser(MessageType.user, user));
@@ -94,6 +94,40 @@ namespace InTouchLibrary
         {
             while (client.Connected)
             {
+                int cout = 0;
+                string mesSend = string.Empty;
+                List<DMMessage> messages = new();
+                // Формирую для user список собщений для каждого его чата 
+                for (var i = 0; i < user.Chats.Count; i++)
+                {
+                    var db = new DBConnection();
+                    messages = db.FindMessageToChat(user.Chats[i].Id);
+                    if (messages != null && messages.Count != 0)
+                    {
+                        foreach (var mes in messages)
+                        {
+                            bool available = true;
+                            foreach (var meschat in user.Chats[i].Messages)
+                                if (mes.Id == meschat.Id)
+                                {
+                                    available = false;
+                                    break;
+                                }
+                            if (available)
+                            {
+                                mesSend = JsonSerializer.Serialize(new MessageSendContent(MessageType.content, mes));
+                                Send(mesSend);
+                                user.Chats[i].Messages.Add(mes);
+                                cout++;
+                            }
+                        }
+                    }
+                }
+                if (cout > 0) Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
+            }
+            /*  Вариант 1
+            while (client.Connected)
+            {
                 //проверяю сообщения со статусом 0 у подключенных клиентов, посылаю им и меняю статус на 1
                 int cout = 0;
                 foreach (var chat in user.Chats)
@@ -103,14 +137,14 @@ namespace InTouchLibrary
                     if (messages != null)
                         foreach (var mes in messages)
                         {
-                            var message = JsonSerializer.Serialize(mes);
+                            var message = JsonSerializer.Serialize(new MessageSendContent (MessageType.content, mes));
                             Send(message);
                             db.UpdateMessageStatus(mes.Id);
                             cout++;
                         }
                 }
-                if (cout>0)Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
-            }
+                if (cout>0) Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
+            }*/
         }
         
         void Reader()
