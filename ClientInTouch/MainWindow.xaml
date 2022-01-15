@@ -31,12 +31,8 @@
                             <Button Name="Button_Settings" Content="Подключение"
                                     Style="{DynamicResource style_ButtonMenu}"/>
                             <Separator />
-                            <MenuItem >
-                            </MenuItem>
-                            <Separator />
                             <MenuItem Header="Администрирование">
                                 <Button Name="Button_AccountSettings" Content="Настройка аккаунтов"
-                                        Click="Button_AccountSettings_Click" 
                                         Style="{DynamicResource style_ButtonMenu}"/>
                         </MenuItem>
                             <MenuItem Header="О программе" />
@@ -53,7 +49,8 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" >
-                <ListBox Name="ChatsList" Background="AliceBlue" SelectionChanged="ChatsList_SelectionChanged">                    
+                <ListBox Name="ChatsList" Background="AliceBlue" 
+                         SelectionChanged="ChatsList_SelectionChanged">                    
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -66,8 +63,8 @@
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Данные чата" Click="MenuItem_Click_Look"></MenuItem>
-                            <MenuItem Header="Удалить" Click="MenuItem_Click_Delete"></MenuItem>
+                            <MenuItem Header="Данные чата"></MenuItem>
+                            <MenuItem Header="Удалить"></MenuItem>
                         </ContextMenu>
                     </ListBox.ContextMenu>
                 </ListBox>

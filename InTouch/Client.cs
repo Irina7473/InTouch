@@ -18,8 +18,6 @@ namespace InTouchLibrary
         private NetworkStream _netStream;
         public DMUser user;
 
-        public bool Connected { get; set; }
-
         public void ConnectToServer(IPAddress ip, int port, string login, string password)
         {
             try
@@ -28,6 +26,7 @@ namespace InTouchLibrary
                 client.Connect(ip, port);
                 _netStream = client.GetStream();
                 Notify?.Invoke(LogType.info, $"{DateTime.Now} Соединение с сервером установлено");
+                //передаю серверу логин-пароль для авторизации
                 string message = JsonSerializer.Serialize<MessageIdent>(new MessageIdent(MessageType.ident, login, password));
                 Send(message);
             }
@@ -42,10 +41,7 @@ namespace InTouchLibrary
             // получаю user с сервера
             var message = Read();
             var mesCreat = JsonSerializer.Deserialize<MessageSendUser>(message); 
-            if (mesCreat.Type == MessageType.user)
-            {
-                user = mesCreat.User;
-            }
+            if (mesCreat.Type == MessageType.user) user = mesCreat.User;
             return user;
         }
 
@@ -130,8 +126,10 @@ namespace InTouchLibrary
 
         public void Close()
         {
+            //сообщаю серверу о закрытии соединения
             var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo (MessageType.leave, "Закрываю соединение"));
             Send(message);
+            //закрываю соединение
             if (client !=null) client.Close();
             if (_netStream !=null) _netStream.Close();
             Notify?.Invoke(LogType.warn, $"{DateTime.Now} Соединение с сервером закрыто");

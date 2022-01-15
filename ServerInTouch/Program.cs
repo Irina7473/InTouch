@@ -20,7 +20,7 @@ namespace ServerInTouch
 
             int port, amt;
             port = 8005;
-            amt = 10;
+            amt = 5;
             /*
             Console.WriteLine("Введите номер порта");
             var stringPort = Console.ReadLine();
@@ -33,7 +33,7 @@ namespace ServerInTouch
             server.StartTcpServer();
         }
 
-        static int NumberCheck(string inputString)
+        static int NumberCheck(string inputString) // проверка введенных чисел
         {            
             bool correct=false;
             int number=-1;            
@@ -50,7 +50,7 @@ namespace ServerInTouch
             return number;
         }
 
-        static void Output(LogType type,string message)
+        static void Output(LogType type,string message) //вывод в консоль
         {
             switch (type)
             {

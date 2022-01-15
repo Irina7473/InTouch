@@ -27,9 +27,10 @@ namespace InTouchLibrary
             try
             {
                 _netStream = client.GetStream();
-                var ident = Identification(numberTouch);
+                var ident = Identification(numberTouch); // Проверка клиента по логину-паролю
                 if (ident)
                 {
+                    //сообщаю клиенту об авторизации
                     var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.recd, $"{user.Login} авторизован"));
                     Send(message);
                     Notify?.Invoke(LogType.info, $"{DateTime.Now} Для соединения {numberTouch} успешный вход пользователя {user.Login}");
@@ -37,6 +38,7 @@ namespace InTouchLibrary
                 }
                 else
                 {
+                    //сообщаю клиенту об ошибке авторизации
                     var message = JsonSerializer.Serialize<MessageInfo>(new MessageInfo(MessageType.error, "Неверный логин или пароль"));
                     Send(message);
                     Close();
@@ -50,7 +52,6 @@ namespace InTouchLibrary
         }
 
         public bool Identification(int numberTouch)
-        // Проверка клиента по логину-паролю
         {
             var message = Read();
             var mesCreat = JsonSerializer.Deserialize<MessageIdent>(message);
@@ -58,7 +59,7 @@ namespace InTouchLibrary
             else
             {
                 var db = new DBConnection();
-                user = db.FindUser(mesCreat.Login, mesCreat.Password); //создан на сервере user со списком его чатов
+                user = db.FindUser(mesCreat.Login, mesCreat.Password); //создаю на сервере user со списком его чатов
                 if (user != null) return true;
                 else return false;
             }
@@ -94,63 +95,46 @@ namespace InTouchLibrary
         {
             while (client.Connected)
             {
-                int cout = 0;
-                string mesSend = string.Empty;
-                List<DMMessage> messages = new();
+                int count = 0; //число отправленных сообщений
                 // Формирую для user список собщений для каждого его чата 
                 for (var i = 0; i < user.Chats.Count; i++)
                 {
                     var db = new DBConnection();
-                    messages = db.FindMessageToChat(user.Chats[i].Id);
+                    var messages = db.FindMessageToChat(user.Chats[i].Id);
                     if (messages != null && messages.Count != 0)
                     {
                         foreach (var mes in messages)
                         {
-                            bool available = true;
-                            foreach (var meschat in user.Chats[i].Messages)
-                                if (mes.Id == meschat.Id)
-                                {
-                                    available = false;
-                                    break;
-                                }
+                            bool available = true; //отсутствие такого сообщения у user
+                            if (user.Chats[i].Messages != null && user.Chats[i].Messages.Count != 0)
+                            {
+                                foreach (var meschat in user.Chats[i].Messages)
+                                    if (mes.Id == meschat.Id)
+                                    {
+                                        available = false;
+                                        break;
+                                    }
+                            }
                             if (available)
                             {
-                                mesSend = JsonSerializer.Serialize(new MessageSendContent(MessageType.content, mes));
+                                //передаю клиенту и добавляю user новые сообщения
+                                var mesSend = JsonSerializer.Serialize(new MessageSendContent(MessageType.content, mes));
                                 Send(mesSend);
                                 user.Chats[i].Messages.Add(mes);
-                                cout++;
+                                count++;
                             }
                         }
                     }
                 }
-                if (cout > 0) Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
+                if (count > 0) Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {count} сообщений");
             }
-            /*  Вариант 1
-            while (client.Connected)
-            {
-                //проверяю сообщения со статусом 0 у подключенных клиентов, посылаю им и меняю статус на 1
-                int cout = 0;
-                foreach (var chat in user.Chats)
-                {
-                    var db = new DBConnection();
-                    var messages = db.FindMessagesStatus(chat.Id);
-                    if (messages != null)
-                        foreach (var mes in messages)
-                        {
-                            var message = JsonSerializer.Serialize(new MessageSendContent (MessageType.content, mes));
-                            Send(message);
-                            db.UpdateMessageStatus(mes.Id);
-                            cout++;
-                        }
-                }
-                if (cout>0) Notify?.Invoke(LogType.text, $"{DateTime.Now} Для {numberTouch} передано {cout} сообщений");
-            }*/
         }
         
         void Reader()
         {
             while (client.Connected)
             {
+                //получаю сообщение клиента и распознаю его тип
                 var message = Read();
                 var mesCreat = JsonSerializer.Deserialize<MessageCreation>(message);
                 if (mesCreat.Type == MessageType.leave) Close();

@@ -31,8 +31,7 @@
                      Style="{DynamicResource style_TextBoxEntry}" 
                      GotFocus="TextBox_Password_GotFocus"  LostFocus="TextBox_Password_LostFocus"/>
             <CheckBox x:Name="CheckBox_Remember"  Content="Запомнить данные"
-                      HorizontalAlignment="Center" Margin="10"
-                      Checked="CheckBox_Remember_Checked" Unchecked="CheckBox_Remember_Unchecked"/>
+                      HorizontalAlignment="Center" Margin="10" />
             <Button x:Name="Button_Entry" Content="Войти" 
                     Click="Button_Entry_Click"  
                     Style="{DynamicResource style_ButtonEntry}" />

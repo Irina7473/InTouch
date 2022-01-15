@@ -23,22 +23,19 @@ namespace ClientInTouch
     /// </summary>
     public partial class AddChatWindow : Window
     {
-        public Client client;
-        string message;
         public static event Action<LogType, string> Notify;
         LogToFile log;
-        
-        ObservableCollection<DMUser> users;
+        public Client client;
+        private ObservableCollection<DMUser> users;
+
         public AddChatWindow()
         {
         InitializeComponent();
-            client = new();
             log = new();
-            message = string.Empty;
             Notify += log.RecordToLog;
             Client.Notify += log.RecordToLog;
-            
-            users = new ObservableCollection<DMUser>{};
+            client = new ();
+            users = new ();
             UsersList.ItemsSource = users;
         }
 

@@ -153,7 +153,7 @@ namespace DataBaseActions
                 }
             }
         }
-        public void UpdateMessageStatus (int idMes)
+        public void UpdateMessageStatus (int idMes) //не использую пока
         {            
             Open();
             _query.CommandText = $"UPDATE table_messages SET status=1 WHERE id='{idMes}';";
@@ -206,7 +206,7 @@ namespace DataBaseActions
                 return true;
             }
         }
-        public int FindUserId (string nameUser)
+        public int FindUserId (string nameUser) // возможно не нужна
         {
             Open();
             _query.CommandText = $"SELECT id FROM table_users where login='{nameUser}';";
@@ -263,7 +263,7 @@ namespace DataBaseActions
                 return true;
             }
         }
-        public int FindChatId(string nameChat)
+        public int FindChatId(string nameChat) 
         {
             Open();
             _query.CommandText = $"SELECT id FROM table_chats where chatName='{nameChat}';";
@@ -282,7 +282,7 @@ namespace DataBaseActions
                 return idChat;
             }
         }
-        public string FindChatName(int idChat)
+        public string FindChatName(int idChat) // возможно не нужна
         {
             Open();
             _query.CommandText = $"SELECT chatName FROM table_chats where id='{idChat}';";
@@ -303,7 +303,7 @@ namespace DataBaseActions
             }
         }
         
-        public List<string> ReceiveListUsers(int idChat)
+        public List<string> ReceiveListUsers(int idChat)  // пока не использую
         {
             Open();
             _query.CommandText = $"SELECT login FROM table_users AS u INNER JOIN table_contacts AS c ON u.id=c.userId WHERE chatId='{idChat}';";
@@ -385,7 +385,7 @@ namespace DataBaseActions
             }
         }
 
-        public List<DMMessage> FindMessagesStatus (int idChat)
+        public List<DMMessage> FindMessagesStatus (int idChat) // не использую пока
         {
             var messages = new List<DMMessage>();
             Open();
