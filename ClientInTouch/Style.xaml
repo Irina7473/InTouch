@@ -159,7 +159,6 @@
             <Setter Property="FontSize" Value="20" />
         </Style.Setters>
     </Style>
-    
     <!-- не получилось выделить-->
     <Style x:Key="style_ListBoxItem" TargetType="ListBoxItem">
         <Style.Triggers>
