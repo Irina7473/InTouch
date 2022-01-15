@@ -8,14 +8,31 @@ using Logger;
 
 namespace InTouchLibrary
 {
+    /// <summary>
+    /// Класс TCP-сервера для создания соединений с клиентами
+    /// </summary>
     public class TcpServer
     {
+        /// <summary>
+        /// Событие делегата Action, принимающее тип события из перечисления LogType и его содержание типа string
+        /// </summary>
         public static event Action<LogType, string> Notify;
         private int _port;
         private TcpListener _listener;
-        private int _amtTouch;  //макс кол-во активных соединений
-        public int numberTouch; //номер соединения
+        /// <summary>
+        /// Максимальное количество активных соединения
+        /// </summary>
+        private int _amtTouch;
+        /// <summary>
+        /// Номер соединения
+        /// </summary>
+        public int numberTouch;
 
+        /// <summary>
+        /// Конструктор TCP-сервера
+        /// </summary>
+        /// <param name="port">Номер порта для соединения</param>
+        /// <param name="amt">Максимальное количество активных соединения</param>
         public TcpServer(int port, int amt)
         {
             _port = port;
@@ -23,6 +40,9 @@ namespace InTouchLibrary
             numberTouch = 0;
         }
 
+        /// <summary>
+        /// Подключение TCP-сервера с прослушиванием и направлением каждого соединения в отдельный поток
+        /// </summary>
         public void StartTcpServer()
         {
             try

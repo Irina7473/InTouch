@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>InTouchLibrary</name>
+    </assembly>
+    <members>
+        <member name="T:InTouchLibrary.Client">
+            <summary>
+            Класс клиента для взаимодействия с TCP-сервером
+            </summary>
+        </member>
+        <member name="E:InTouchLibrary.Client.Notify">
+            <summary>
+            Событие делегата Action, принимающее тип события из перечисления LogType и его содержание типа string
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.Client.client">
+            <summary>
+            Объект класса TcpClient
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.Client.user">
+            <summary>
+            Объект класса DMUser
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.Client.ConnectToServer(System.Net.IPAddress,System.Int32,System.String,System.String)">
+            <summary>
+            Соединение с сервером и передача логина и пароля для авторизации
+            </summary>
+            <param name="ip">IPAddress</param>
+            <param name="port">Номер порта для соединения</param>
+            <param name="login">Логин пользователя</param>
+            <param name="password">Пароль пользователя</param>
+        </member>
+        <member name="M:InTouchLibrary.Client.ReceiveUser">
+            <summary>
+            Получение от сервера пользователя и инициализация поля user
+            </summary>
+            <returns>оъбект класса DMUser</returns>
+        </member>
+        <member name="M:InTouchLibrary.Client.Send(System.String)">
+            <summary>
+            Отправка сообщения
+            </summary>
+            <param name="message">Текстовое сообщение</param>
+        </member>
+        <member name="M:InTouchLibrary.Client.Read">
+            <summary>
+            Чтение сообщения
+            </summary>
+            <returns>Текстовое сообщение</returns>
+        </member>
+        <member name="M:InTouchLibrary.Client.Close">
+            <summary>
+            Закрытие клиентом соединения и программы
+            </summary>
+        </member>
+        <member name="T:InTouchLibrary.ClientConnection">
+            <summary>
+            Класс взаимодействия TCP-сервера с клиентом
+            </summary>
+        </member>
+        <member name="E:InTouchLibrary.ClientConnection.Notify">
+            <summary>
+            Событие делегата Action, принимающее тип события из перечисления LogType и его содержание типа string
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.ClientConnection.numberTouch">
+            <summary>
+            Номер соединения сервера с клиентом
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.ClientConnection.client">
+            <summary>
+            Объект класса TcpClient
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.ClientConnection.user">
+            <summary>
+            Объект класса DMUser
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.ConnectToClient(System.Net.Sockets.TcpClient,System.Int32)">
+            <summary>
+            Обработка результата авторизации клиента и сообщение ем результата
+            </summary>
+            <param name="connection">Объект класса TcpClient</param>
+            <param name="number">Номер соединения сервера с клиентом</param>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.Identification(System.Int32)">
+            <summary>
+            Авторизация клиента
+            </summary>
+            <param name="numberTouch">Номер соединения сервера с клиентом</param>
+            <returns>Логическая переменная типа bool</returns>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.Communication">
+            <summary>
+            Первая передача клиенту данных из базы данных и запуск передачи  прослушивания сообщений
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.Sender">
+            <summary>
+            Передача сообщений клиенту по мере их появения в базе данных
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.Reader">
+            <summary>
+            Чтение сообщений от клиента по мере их поступления
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:InTouchLibrary.ClientConnection.Send(System.String)" -->
+        <member name="M:InTouchLibrary.ClientConnection.Read">
+            <summary>
+            Чтение сообщения
+            </summary>
+            <returns>Текстовое сообщение</returns>
+        </member>
+        <member name="M:InTouchLibrary.ClientConnection.Close">
+            <summary>
+            Закрытие соединения с клиентом
+            </summary>
+        </member>
+        <member name="T:InTouchLibrary.MessageType">
+            <summary>
+            Перечисление типов сообщений между сервером и клиентом
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.info">
+            <summary>
+            Информация
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.warn">
+            <summary>
+            Информация, требующая внимания
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.error">
+            <summary>
+            Информация об ошибке
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.recd">
+            <summary>
+            Сообщение о принятии информации
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.ident">
+            <summary>
+            Информация для идентификации пользователя
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.user">
+            <summary>
+            Информация о пользователе
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.chat">
+            <summary>
+            Информация о чате
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.content">
+            <summary>
+            Информация о содержании сообщения
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.MessageType.leave">
+            <summary>
+            Информация о закрытии соединения
+            </summary>
+        </member>
+        <member name="T:InTouchLibrary.MessageCreation">
+            <summary>
+            Базовый класс для создания сообщений
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageCreation.Type">
+            <summary>
+            Объект перечисления MessageType
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageCreation.#ctor(InTouchLibrary.MessageType)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+        </member>
+        <member name="T:InTouchLibrary.MessageInfo">
+            <summary>
+            Класс для создания информационных сообщений, наследник класса MessageCreation
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageInfo.Mes">
+            <summary>
+            Текст сообщения
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageInfo.#ctor(InTouchLibrary.MessageType,System.String)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType и  текстовое сообщение
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+            <param name="mes">Текстовое сообщение</param>
+        </member>
+        <member name="T:InTouchLibrary.MessageIdent">
+            <summary>
+            Класс для создания сообщений об авторизации, наследник класса MessageCreation
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageIdent.Login">
+            <summary>
+            Логин пользователя
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageIdent.Password">
+            <summary>
+            Пароль пользователя
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageIdent.#ctor(InTouchLibrary.MessageType,System.String,System.String)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType, логин и пароль пользователя типа string
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+            <param name="login">Логин типа strin</param>
+            <param name="password">Пароль типа strin</param>
+        </member>
+        <member name="T:InTouchLibrary.MessageSendUser">
+            <summary>
+            Класс для создания сообщений о пользователе, наследник класса MessageCreation
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageSendUser.User">
+            <summary>
+            Пользователь, объект класса DMUser
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageSendUser.#ctor(InTouchLibrary.MessageType,DataBaseActions.DMUser)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType и объект класса DMUser
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+            <param name="user">Пользователь - объект класса DMUser</param>
+        </member>
+        <member name="T:InTouchLibrary.MessageSendChat">
+            <summary>
+            Класс для создания сообщений о чате, наследник класса MessageCreation
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageSendChat.Chat">
+            <summary>
+            Чат, объект класса DMChat
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageSendChat.#ctor(InTouchLibrary.MessageType,DataBaseActions.DMChat)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType и объект класса DMChat
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+            <param name="chat">Чат - объект класса DMChat</param>
+        </member>
+        <member name="T:InTouchLibrary.MessageSendContent">
+            <summary>
+            Класс для создания сообщений о сообщениях пользователей в чате, наследник класса MessageCreation
+            </summary>
+        </member>
+        <member name="P:InTouchLibrary.MessageSendContent.Message">
+            <summary>
+            Сообщение, объект класса DMMessage
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.MessageSendContent.#ctor(InTouchLibrary.MessageType,DataBaseActions.DMMessage)">
+            <summary>
+            Конструктор, принимающий Объект перечисления MessageType и объект класса DMMessage
+            </summary>
+            <param name="type">Объект перечисления MessageType</param>
+            <param name="message">Сообщение - объект класса DMMessage</param>
+        </member>
+        <member name="T:InTouchLibrary.TcpServer">
+            <summary>
+            Класс TCP-сервера для создания соединений с клиентами
+            </summary>
+        </member>
+        <member name="E:InTouchLibrary.TcpServer.Notify">
+            <summary>
+            Событие делегата Action, принимающее тип события из перечисления LogType и его содержание типа string
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.TcpServer._amtTouch">
+            <summary>
+            Максимальное количество активных соединения
+            </summary>
+        </member>
+        <member name="F:InTouchLibrary.TcpServer.numberTouch">
+            <summary>
+            Номер соединения
+            </summary>
+        </member>
+        <member name="M:InTouchLibrary.TcpServer.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Конструктор TCP-сервера
+            </summary>
+            <param name="port">Номер порта для соединения</param>
+            <param name="amt">Максимальное количество активных соединения</param>
+        </member>
+        <member name="M:InTouchLibrary.TcpServer.StartTcpServer">
+            <summary>
+            Подключение TCP-сервера с прослушиванием и направлением каждого соединения в отдельный поток
+            </summary>
+        </member>
+    </members>
+</doc>

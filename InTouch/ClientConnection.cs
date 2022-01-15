@@ -12,14 +12,34 @@ using System.Text.Json;
 
 namespace InTouchLibrary
 {
+    /// <summary>
+    /// Класс взаимодействия TCP-сервера с клиентом
+    /// </summary>
     public class ClientConnection
     {
+        /// <summary>
+        /// Событие делегата Action, принимающее тип события из перечисления LogType и его содержание типа string
+        /// </summary>
         public static event Action<LogType, string> Notify;
+        /// <summary>
+        /// Номер соединения сервера с клиентом
+        /// </summary>
         public int numberTouch;
+        /// <summary>
+        /// Объект класса TcpClient
+        /// </summary>
         public TcpClient client;
         private NetworkStream _netStream;
+        /// <summary>
+        /// Объект класса DMUser
+        /// </summary>
         public DMUser user;
 
+        /// <summary>
+        /// Обработка результата авторизации клиента и сообщение ем результата
+        /// </summary>
+        /// <param name="connection">Объект класса TcpClient</param>
+        /// <param name="number">Номер соединения сервера с клиентом</param>
         public void ConnectToClient(TcpClient connection, int number)
         {
             client = connection;
@@ -27,7 +47,7 @@ namespace InTouchLibrary
             try
             {
                 _netStream = client.GetStream();
-                var ident = Identification(numberTouch); // Проверка клиента по логину-паролю
+                var ident = Identification(numberTouch);
                 if (ident)
                 {
                     //сообщаю клиенту об авторизации
@@ -51,6 +71,11 @@ namespace InTouchLibrary
             }
         }
 
+        /// <summary>
+        /// Авторизация клиента
+        /// </summary>
+        /// <param name="numberTouch">Номер соединения сервера с клиентом</param>
+        /// <returns>Логическая переменная типа bool</returns>
         public bool Identification(int numberTouch)
         {
             var message = Read();
@@ -65,6 +90,9 @@ namespace InTouchLibrary
             }
         }
 
+        /// <summary>
+        /// Первая передача клиенту данных из базы данных и запуск передачи  прослушивания сообщений
+        /// </summary>
         public void Communication() 
         {
             // Формирую для user список собщений для каждого его чата 
@@ -91,6 +119,9 @@ namespace InTouchLibrary
             }
         }  
         
+        /// <summary>
+        /// Передача сообщений клиенту по мере их появения в базе данных
+        /// </summary>
         void Sender ()
         {
             while (client.Connected)
@@ -130,6 +161,9 @@ namespace InTouchLibrary
             }
         }
         
+        /// <summary>
+        /// Чтение сообщений от клиента по мере их поступления
+        /// </summary>
         void Reader()
         {
             while (client.Connected)
@@ -174,6 +208,10 @@ namespace InTouchLibrary
             }
         }
 
+        /// <summary>
+        /// Отправка сообщения
+        /// </summary>
+        /// <param name="message">Текстовое сообщение</param
         public void Send(string message)
         {
             if (client.Connected)
@@ -194,17 +232,15 @@ namespace InTouchLibrary
                         return;
                     }
                 }
-                catch (Exception e)
-                {
-                    Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}");
-                }
+                catch (Exception e) { Notify?.Invoke(LogType.error, $"{DateTime.Now} {e}"); }
             }
-            else
-            {
-                Notify?.Invoke(LogType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение");
-            }
+            else  { Notify?.Invoke(LogType.warn, $"{DateTime.Now} Клиент {numberTouch} разорвал соединение"); }
         }
 
+        /// <summary>
+        /// Чтение сообщения
+        /// </summary>
+        /// <returns>Текстовое сообщение</returns>
         public string Read()
         {
             if (client.Connected)
@@ -253,6 +289,9 @@ namespace InTouchLibrary
             }
         }
 
+        /// <summary>
+        /// Закрытие соединения с клиентом
+        /// </summary>
         private void Close ()
         {
             if (client != null) client.Close();
